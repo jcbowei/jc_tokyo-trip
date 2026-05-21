@@ -1,994 +1,914 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { 
-  Calendar, 
-  MapPin, 
-  Clock, 
-  Plane, 
-  Hotel, 
-  Train, 
-  AlertTriangle, 
-  Info, 
-  Utensils, 
-  Compass, 
-  Heart,
-  ChevronDown,
-  Sparkles,
-  Sun,
-  Minus,
-  Menu,
-  ArrowLeft,
-  ArrowRight,
-  ExternalLink
-} from 'lucide-react';
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tokyo 東京 6 天 5 夜最終完整版行程</title>
+  
+  <!-- 導入 Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- 導入 Lucide Icons (用來還原所有細緻的圖示) -->
+  <script src="https://unpkg.com/lucide@latest"></script>
 
-// 封裝局部 3D 視差懸停卡片元件（適用於 iOS 的細緻擬真陰影）
-function LocalTiltCard({ children, className = "" }) {
-  const cardRef = useRef(null);
-  const [tiltStyle, setTiltStyle] = useState({ transform: 'perspective(1000px) rotateX(0deg) rotateY(0deg)' });
-
-  const handleMouseMove = (e) => {
-    if (!cardRef.current) return;
-    const card = cardRef.current;
-    const rect = card.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / rect.width - 0.5;
-    const y = (e.clientY - rect.top) / rect.height - 0.5;
+  <style>
+    /* 細黑體樣式優化，符合 Apple 設計美學 */
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Segoe UI", "PingFang TC", "Microsoft JhengHei", sans-serif;
+      font-weight: 300;
+    }
     
-    // 微幅優雅傾斜（4度，保持精緻質感）
-    const maxTilt = 4;
-    const rotateX = -y * maxTilt;
-    const rotateY = x * maxTilt;
-    
-    setTiltStyle({
-      transform: `perspective(1000px) rotateX(${rotateX.toFixed(2)}deg) rotateY(${rotateY.toFixed(2)}deg) translateY(-4px)`,
-      transition: 'transform 0.15s cubic-bezier(0.25, 1, 0.5, 1)',
-      boxShadow: '0 25px 50px rgba(16, 185, 129, 0.08)'
-    });
-  };
+    /* 每個單字獨立的物理不規則漂游動畫 */
+    @keyframes letter-drift-T {
+      0%, 100% { transform: translate(0px, 0px) rotate(0deg) scale(1); }
+      25% { transform: translate(-22px, 15px) rotate(-4deg) scale(1.04); }
+      50% { transform: translate(-10px, -28px) rotate(3deg) scale(0.96); }
+      75% { transform: translate(18px, 12px) rotate(-2deg) scale(1.02); }
+    }
+    @keyframes letter-drift-O1 {
+      0%, 100% { transform: translate(0px, 0px) rotate(0deg) scale(1.08); }
+      30% { transform: translate(26px, -18px) rotate(5deg) scale(0.94); }
+      65% { transform: translate(-18px, 20px) rotate(-5deg) scale(1.05); }
+      85% { transform: translate(12px, -9px) rotate(2deg) scale(0.97); }
+    }
+    @keyframes letter-drift-K {
+      0%, 100% { transform: translate(0px, 0px) rotate(0deg) scale(0.96); }
+      20% { transform: translate(-16px, -24px) rotate(-6deg) scale(1.04); }
+      52% { transform: translate(20px, 14px) rotate(4deg) scale(0.93); }
+      78% { transform: translate(-18px, 8px) rotate(-3deg) scale(1.02); }
+    }
+    @keyframes letter-drift-Y {
+      0%, 100% { transform: translate(0px, 0px) rotate(0deg) scale(1.04); }
+      28% { transform: translate(26px, 22px) rotate(6deg) scale(0.94); }
+      58% { transform: translate(-20px, -14px) rotate(-5deg) scale(1.06); }
+      82% { transform: translate(8px, 16px) rotate(2deg) scale(0.96); }
+    }
+    @keyframes letter-drift-O2 {
+      0%, 100% { transform: translate(0px, 0px) rotate(0deg) scale(1.02); }
+      24% { transform: translate(-20px, 18px) rotate(-4deg) scale(1.03); }
+      45% { transform: translate(16px, -26px) rotate(5deg) scale(0.92); }
+      72% { transform: translate(-8px, -12px) rotate(-1deg) scale(1.05); }
+    }
 
-  const handleMouseLeave = () => {
-    setTiltStyle({
-      transform: 'perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0px)',
-      transition: 'transform 0.8s cubic-bezier(0.25, 1, 0.5, 1)',
-      boxShadow: '0 4px 20px rgba(0, 0, 0, 0.02)'
-    });
-  };
+    /* 夏日大自然漸層流動動畫 */
+    @keyframes aurora-flow-1 {
+      0%, 100% { transform: translate(-10%, -10%) scale(1); }
+      50% { transform: translate(15%, 10%) scale(1.25); }
+    }
+    @keyframes aurora-flow-2 {
+      0%, 100% { transform: translate(10%, 15%) scale(1.2); }
+      50% { transform: translate(-15%, -10%) scale(0.85); }
+    }
+    @keyframes marquee {
+      0% { transform: translateX(0%); }
+      100% { transform: translateX(-50%); }
+    }
 
-  return (
-    <div
-      ref={cardRef}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
-      style={tiltStyle}
-      className={`transition-all duration-500 ${className}`}
-    >
-      {children}
-    </div>
-  );
-}
-
-export default function App() {
-  const [activeDay, setActiveDay] = useState(0);
-  const [expandedSpot, setExpandedSpot] = useState(null);
-
-  // 自訂流光游標狀態（iOS 微光球）
-  const [mousePos, setMousePos] = useState({ x: -100, y: -100 });
-  const [trailPos, setTrailPos] = useState({ x: -100, y: -100 });
-  const [isHovered, setIsHovered] = useState(false);
-  const [cursorVisible, setCursorVisible] = useState(false);
-
-  // 游標阻尼運動
-  useEffect(() => {
-    let animationFrameId;
-    const updateTrail = () => {
-      setTrailPos((prev) => {
-        const dx = mousePos.x - prev.x;
-        const dy = mousePos.y - prev.y;
-        return {
-          x: prev.x + dx * 0.12,
-          y: prev.y + dy * 0.12
-        };
-      });
-      animationFrameId = requestAnimationFrame(updateTrail);
-    };
-    animationFrameId = requestAnimationFrame(updateTrail);
-    return () => cancelAnimationFrame(animationFrameId);
-  }, [mousePos]);
-
-  useEffect(() => {
-    const handleMouseMove = (e) => {
-      setMousePos({ x: e.clientX, y: e.clientY });
-      if (!cursorVisible) setCursorVisible(true);
-    };
-    
-    const handleMouseLeave = () => setCursorVisible(false);
-
-    window.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseleave', handleMouseLeave);
-    
-    return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseleave', handleMouseLeave);
-    };
-  }, [cursorVisible]);
-
-  // 100% 完整保留行程核心數據 (新增對應之 Google Maps 連結)
-  const tripInfo = {
-    title: "Tokyo 東京 最終完整版行程",
-    date: "2026/6/4（四）– 6/9（二）",
-    flights: {
-      departure: {
-        date: "6/4（四）",
-        code: "Scoot TR866",
-        time: "06:45 桃園 (TPE) → 11:15 成田 (NRT)",
-        duration: "約 3 小時 30 分",
-        mapUrl: "https://www.google.com/maps/search/?api=1&query=成田國際機場+第一航廈"
-      },
-      return: {
-        date: "6/9（二）",
-        code: "Scoot TR867",
-        time: "21:15 成田 (NRT) → 23:55 桃園 (TPE)",
-        mapUrl: "https://www.google.com/maps/search/?api=1&query=成田國際機場+第一航廈"
+    /* Apple 官網級別的標題 Reveal 與呼吸擴展動態 */
+    @keyframes apple-title-reveal {
+      0% {
+        opacity: 0;
+        transform: translateY(24px) scale(0.98);
+        letter-spacing: -0.05em;
+        filter: blur(10px);
       }
-    },
-    hotel: {
-      name: "BookTeaBed Shibuya",
-      checkIn: "2026/6/4（四）15:00 後",
-      checkOut: "2026/6/9（二）10:00 前",
-      advantages: ["位於澀谷，回飯店超方便", "幾乎所有行程直達", "梅雨季很適合（室內選擇多）"],
-      mapUrl: "https://www.google.com/maps/search/?api=1&query=BookTeaBed+Shibuya"
-    },
-    traffic: {
-      route: "成田 ↔ 澀谷",
-      recommend: "Narita Express (N’EX)",
-      reason: "直達澀谷、不用搬行李轉車、最穩定",
-      suggestion: "去回程都搭乘。",
-      mapUrl: "https://www.google.com/maps/search/?api=1&query=澀谷站"
+      100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        letter-spacing: -0.012em;
+        filter: blur(0);
+      }
     }
-  };
 
-  const highlights = [
-    { type: "東京夜景", spot: "Shibuya Sky", mapUrl: "https://www.google.com/maps/search/?api=1&query=Shibuya+Sky" },
-    { type: "紫陽花季", spot: "鎌倉 ＋ 文京紫陽花祭", mapUrl: "https://www.google.com/maps/search/?api=1&query=明月院" },
-    { type: "東京年輕人感", spot: "下北澤", mapUrl: "https://www.google.com/maps/search/?api=1&query=下北澤" },
-    { type: "東京 local 感", spot: "高圓寺", mapUrl: "https://www.google.com/maps/search/?api=1&query=高圓寺" },
-    { type: "流行地標", spot: "Harakado", mapUrl: "https://www.google.com/maps/search/?api=1&query=東急プラザ原宿「ハラカド」" },
-    { type: "必吃拉麵", spot: "Jikasei MENSHO", mapUrl: "https://www.google.com/maps/search/?api=1&query=Jikasei+MENSHO" },
-    { type: "必吃壽司", spot: "根室花丸 (KITTE)", mapUrl: "https://www.google.com/maps/search/?api=1&query=根室花丸+KITTE" },
-    { type: "在地美食", spot: "月島文字燒", mapUrl: "https://www.google.com/maps/search/?api=1&query=月島もんじゃ+もへじ+本店" },
-    { type: "湘慢海邊感", spot: "湘南 ＋ 七里濱", mapUrl: "https://www.google.com/maps/search/?api=1&query=七里濱" }
-  ];
+    .animate-drift-T { animation: letter-drift-T 9s ease-in-out infinite; }
+    .animate-drift-O1 { animation: letter-drift-O1 11s ease-in-out infinite; }
+    .animate-drift-K { animation: letter-drift-K 10s ease-in-out infinite; }
+    .animate-drift-Y { animation: letter-drift-Y 12s ease-in-out infinite; }
+    .animate-drift-O2 { animation: letter-drift-O2 8s ease-in-out infinite; }
 
-  const days = [
-    {
-      day: "Day 1",
-      date: "6/4（四）",
-      theme: "澀谷暖身 ＆ 下北澤古著夜",
-      spots: [
-        {
-          time: "中午左右",
-          title: "抵達東京 ＆ 前往澀谷",
-          desc: "成田入境後搭 N’EX 直達澀谷，前往飯店寄放行李。",
-          warning: "第一天下午不要排太滿。因為清晨起飛與長途進城非常消耗體力！",
-          type: "traffic",
-          mapUrl: "https://www.google.com/maps/search/?api=1&query=澀谷站"
-        },
-        {
-          time: "下午",
-          title: "MIYASHITA PARK & Shibuya PARCO",
-          desc: "經典的潮流地標與空中公園，適合第一天暖身並隨意逛街。",
-          type: "spot",
-          mapUrl: "https://www.google.com/maps/search/?api=1&query=MIYASHITA+PARK"
-        },
-        {
-          time: "18:00",
-          title: "晚餐｜Jikasei MENSHO",
-          desc: "東京年輕人超愛的「東京創作系拉麵」，台灣還吃不到！",
-          info: "營業時間：11:00–22:00",
-          type: "food",
-          mapUrl: "https://www.google.com/maps/search/?api=1&query=Jikasei+MENSHO"
-        },
-        {
-          time: "晚上",
-          title: "下北澤 Shimokitazawa",
-          desc: "充滿古著、獨立咖啡店與 Live House 的東京年輕人基地。",
-          warning: "如果太累的話，強烈建議直接回飯店休息，不要硬撐喔！",
-          type: "spot",
-          mapUrl: "https://www.google.com/maps/search/?api=1&query=下北澤"
-        }
-      ]
-    },
-    {
-      day: "Day 2",
-      date: "6/5（五）",
-      theme: "現代美學、潮流新地標與澀谷高空夜景",
-      spots: [
-        {
-          time: "上午",
-          title: "國立新美術館 (六本木)",
-          desc: "黑川紀章設計的波浪玻璃建築本身就非常震撼。可以現場看當期展覽再決定是否購票。",
-          info: "營業時間：10:00–18:00（五、六延長至 20:00）",
-          type: "spot",
-          mapUrl: "https://www.google.com/maps/search/?api=1&query=國立新美術館"
-        },
-        {
-          time: "下午",
-          title: "Harakado (原角)",
-          desc: "東京目前最红的複合式空間，擁有高空露台與各類新興潮流品牌，洋溢 Gen Z 活力。",
-          type: "spot",
-          mapUrl: "https://www.google.com/maps/search/?api=1&query=東急プラザ原宿「ハラカド」"
-        },
-        {
-          time: "傍晚",
-          title: "日枝神社 Hie Shrine",
-          desc: "感受初夏東京的神社氛圍，正好碰上山王祭期間（雖然今日不是大遊行日，但仍有祭典氣氛）。",
-          type: "spot",
-          mapUrl: "https://www.google.com/maps/search/?api=1&query=日枝神社"
-        },
-        {
-          time: "17:00 - 17:30",
-          title: "Shibuya Sky 星空展望台",
-          desc: "魔幻時刻（黃昏過渡到夜景）的最佳入場時間！",
-          warning: "若遇大雨、厚雲或強風，觀景台可能關閉，建議此時段取消。",
-          type: "highlight",
-          mapUrl: "https://www.google.com/maps/search/?api=1&query=Shibuya+Sky"
-        }
-      ]
-    },
-    {
-      day: "Day 3",
-      date: "6/6（六）",
-      theme: "鎌倉紫陽花極致一日遊（核心行程）",
-      spots: [
-        {
-          time: "上午",
-          title: "明月院 Meigetsuin",
-          desc: "正值紫陽花高峰期，親眼見證經典的「明月院藍」。微雨的日子裡，花瓣沾著雨滴反而更漂亮、更精緻！",
-          type: "highlight",
-          mapUrl: "https://www.google.com/maps/search/?api=1&query=明月院"
-        },
-        {
-          time: "中午",
-          title: "長谷寺 Hasedera Temple",
-          desc: "鎌倉另一個紫陽花名所，沿著山路能一邊眺望湘南海岸一邊賞花。",
-          type: "spot",
-          mapUrl: "https://www.google.com/maps/search/?api=1&query=長谷寺"
-        },
-        {
-          time: "下午",
-          title: "江之電體驗 ＆ 七里濱散策",
-          desc: "乘著江之電電車，在七里濱（Shichirigahama）下車，沿著海岸線散步，享受湘南獨特的慵懶海風。",
-          type: "spot",
-          mapUrl: "https://www.google.com/maps/search/?api=1&query=七里濱"
-        },
-        {
-          time: "晚餐",
-          title: "晚餐｜鐵板料理 Tetsubo",
-          desc: "極具湘南 local感與海邊隨性氛圍的鐵板燒，比起東京市區的觀光鐵板料理更有味道與人情味。",
-          type: "food",
-          mapUrl: "https://www.google.com/maps/search/?api=1&query=Tetsubo+Kamakura"
-        }
-      ]
-    },
-    {
-      day: "Day 4",
-      date: "6/7（日）",
-      theme: "文京紫陽花祭、月島文字燒與高圓寺 local 散策",
-      spots: [
-        {
-          time: "10:30",
-          title: "白山神社 (文京紫陽花祭)",
-          desc: "東京市區最熱鬧的夏日祭典！推薦 12:00 觀賞日本箏曲表演，或 13:00–14:00 參與開幕式。現場會有許多 Kitchen Car 攤販與傳統工藝展現。",
-          warning: "建議 14:00 左右離開，因為午後人潮會非常擁擠！",
-          type: "highlight",
-          mapUrl: "https://www.google.com/maps/search/?api=1&query=白山神社"
-        },
-        {
-          time: "14:30 - 15:00",
-          title: "午晚餐｜月島文字燒 (Monja Moheji 旗艦店)",
-          desc: "刻意排在避開正餐的下午時段，可以大幅省去排隊等待的時間，輕鬆享受道地的文字燒！",
-          type: "food",
-          mapUrl: "https://www.google.com/maps/search/?api=1&query=月島もんじゃ+もへじ+本店"
-        },
-        {
-          time: "傍晚",
-          title: "高圓寺 Koenji",
-          desc: "滿滿的古著店、昭和風喫茶店，充滿東京 local 與獨立青年的生活感。",
-          warning: "如果今天走路太多太累，這段可以彈性取消，提早回澀谷休息。",
-          type: "spot",
-          mapUrl: "https://www.google.com/maps/search/?api=1&query=高圓寺"
-        }
-      ]
-    },
-    {
-      day: "Day 5",
-      date: "6/8（一）",
-      theme: "秋葉原文化、丸之內夜景與極品根室花丸",
-      spots: [
-        {
-          time: "上午 - 下午",
-          title: "秋葉原 Akihabara",
-          desc: "懷舊復古遊戲 (Retro Game)、精緻動漫模型與神祕電子商場，感受最獨特的 weird 東京文化。",
-          type: "spot",
-          mapUrl: "https://www.google.com/maps/search/?api=1&query=秋葉原"
-        },
-        {
-          time: "傍晚",
-          title: "丸之內 Marunouchi",
-          desc: "漫步在東京車站紅磚廣場前，在繁華的高樓間欣賞典雅的橘黃燈光，彷彿置身於電影場景中。",
-          type: "spot",
-          mapUrl: "https://www.google.com/maps/search/?api=1&query=東京車站+丸之內"
-        },
-        {
-          time: "16:30 前",
-          title: "晚餐｜迴轉壽司 根室花丸 (KITTE)",
-          desc: "來自北海道的極品海鮮！招牌干貝與生鮮食材極度美味。",
-          warning: "這家店非常受歡迎！請務必在 16:30 前先到 KITTE 未來大樓現場抽取號碼牌，再到附近逛街，否則會等很久！",
-          type: "food",
-          mapUrl: "https://www.google.com/maps/search/?api=1&query=根室花丸+KITTE"
-        }
-      ]
-    },
-    {
-      day: "Day 6",
-      date: "6/9（二）",
-      theme: "吉祥寺森林晨散、澀谷最後採購 ＆ 完美歸國",
-      spots: [
-        {
-          time: "上午",
-          title: "吉祥寺 ＆ 井之頭恩賜公園",
-          desc: "在初夏微陰的早晨散步於井之頭公園，欣賞湖光綠意。這裡有著濃郁的日本文青電影感。",
-          warning: "今天是最後一天，不建議再硬排新宿等複雜、易迷路的大車站行程。",
-          type: "spot",
-          mapUrl: "https://www.google.com/maps/search/?api=1&query=井之頭恩賜公園"
-        },
-        {
-          time: "中午",
-          title: "吉祥寺自由午餐",
-          desc: "可在吉祥寺商圈、口琴橫丁尋找在地小吃 or 藥妝補貨。",
-          type: "food",
-          mapUrl: "https://www.google.com/maps/search/?api=1&query=吉祥寺"
-        },
-        {
-          time: "下午",
-          title: "回澀谷拿行李 ＆ 最後採買",
-          desc: "回到 BookTeaBed 拿行李，做最後的街頭巡禮，接著準備前往成體。",
-          type: "traffic",
-          mapUrl: "https://www.google.com/maps/search/?api=1&query=澀谷站"
-        },
-        {
-          time: "17:30 前",
-          title: "搭乘 N'EX 前往成田機場",
-          desc: "成田機場距離市區偏遠，且國際線 T1 非常寬敞，預留足夠的時間通關，還可以在免稅店輕鬆購物！",
-          warning: "建議最晚 17:30 以前必須離開東京市區！",
-          type: "traffic",
-          mapUrl: "https://www.google.com/maps/search/?api=1&query=成田國際機場+第一航廈"
-        }
-      ]
+    .bg-aurora-1 { animation: aurora-flow-1 20s ease-in-out infinite; }
+    .bg-aurora-2 { animation: aurora-flow-2 24s ease-in-out infinite; }
+    
+    /* 巨幅背景跑馬燈軌道樣式 */
+    .bg-marquee-track {
+      display: flex;
+      width: max-content;
+      animation: bg-marquee-infinite 28s linear infinite;
     }
-  ];
-
-  const backupFood = {
-    title: "備選美食：Sukiyaki Chikayo Shibuya (壽喜燒)",
-    pros: "最近在社群極紅，裝潢美學極好，年輕質感滿分。",
-    cons: "位置極少、很容易排長隊。",
-    status: "「有空再吃」的備案即可",
-    mapUrl: "https://www.google.com/maps/search/?api=1&query=Sukiyaki+Chikayo+Shibuya"
-  };
-
-  const getSpotStyle = (type) => {
-    switch (type) {
-      case 'highlight': 
-        return 'border-emerald-200/60 bg-emerald-50/20 hover:bg-emerald-100/30';
-      case 'food': 
-        return 'border-teal-200/60 bg-teal-50/20 hover:bg-teal-100/30';
-      case 'traffic': 
-        return 'border-amber-200/50 bg-amber-50/15 hover:bg-amber-100/25';
-      default: 
-        return 'border-white/20 bg-white/10 hover:bg-white/20';
+    @keyframes bg-marquee-infinite {
+      0% { transform: translateX(0%); }
+      100% { transform: translateX(-50%); }
     }
-  };
 
-  const getSpotIcon = (type) => {
-    switch (type) {
-      case 'highlight': return <Sparkles className="w-4 h-4 text-emerald-500 animate-pulse" />;
-      case 'food': return <Utensils className="w-4 h-4 text-teal-600" />;
-      case 'traffic': return <Train className="w-4 h-4 text-amber-500" />;
-      default: return <MapPin className="w-4 h-4 text-emerald-400" />;
+    /* 跑馬燈軌道 */
+    .marquee-track {
+      display: flex;
+      width: max-content;
+      animation: marquee 22s linear infinite;
     }
-  };
 
-  // 一鍵導航點擊專用 (防止手風琴觸發開合)
-  const handleMapRedirect = (e, url) => {
-    e.stopPropagation();
-    if (url) {
-      window.open(url, '_blank', 'noopener,noreferrer');
+    /* 標題流光質感 */
+    .apple-title-fir-tokyo {
+      background: linear-gradient(135deg, #022c22 0%, #064e3b 60%, #0f766e 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: apple-title-reveal 1.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
-  };
 
-  return (
-    <div className="min-h-screen text-slate-800 relative overflow-hidden font-sans font-light selection:bg-emerald-100 pb-12">
+    .apple-title-fir-trends {
+      background: linear-gradient(135deg, #065f46 0%, #0d9488 70%, #14b8a6 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: apple-title-reveal 1.8s cubic-bezier(0.16, 1, 0.3, 1) 0.15s forwards;
+    }
+
+    /* 融合 image_721624 苔蘚清晨光影的高級底盤 */
+    .moss-premium-bg {
+      background-color: #f0f4f1;
+      background-image: 
+        linear-gradient(180deg, rgba(230, 240, 232, 0.45) 0%, rgba(240, 245, 241, 0.95) 100%), 
+        url('https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?q=80&w=1000&auto=format&fit=crop'); /* 使用優質林木綠意光影作為備用高解析底圖 */
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      background-blend-mode: overlay;
+    }
+
+    .scrollbar-none::-webkit-scrollbar {
+      display: none;
+    }
+    .scrollbar-none {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    /* 模擬 iOS 系統游標 (微光球) */
+    .custom-cursor {
+      pointer-events: none;
+      transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1), height 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    
+    /* 展開/收合動畫過渡 */
+    .spot-content-transition {
+      transition: max-height 0.5s ease-in-out, opacity 0.4s ease-in-out;
+    }
+  </style>
+</head>
+<body class="min-h-screen text-slate-800 relative overflow-x-hidden font-sans font-light selection:bg-emerald-100 pb-12 moss-premium-bg">
+
+  <!-- ================= 背景夏日不規則液態光暈 ================= -->
+  <div class="absolute inset-0 overflow-hidden pointer-events-none z-0">
+    <div class="absolute top-[10%] left-[-10%] w-[60vw] h-[60vw] rounded-full bg-emerald-300/35 filter blur-[100px] bg-aurora-1"></div>
+    <div class="absolute bottom-[10%] right-[-10%] w-[65vw] h-[65vw] rounded-full bg-teal-200/30 filter blur-[120px] bg-aurora-2"></div>
+  </div>
+
+  <!-- ================= 白色 TOKYO 英文字母獨立不規則飄游動態 (提高能見度，加深綠色陰影 25%) ================= -->
+  <div class="fixed inset-0 overflow-hidden pointer-events-none select-none z-0 flex items-center justify-center">
+    <div class="text-white/[0.38] font-sans font-black text-[25vw] md:text-[21vw] tracking-tighter flex items-center justify-center gap-2 filter drop-shadow-[0_20px_35px_rgba(16,185,129,0.25)]">
+      <span class="inline-block animate-drift-T">T</span>
+      <span class="inline-block animate-drift-O1">O</span>
+      <span className="inline-block" style="display: none;">O</span> <!-- 預留占位符 -->
+      <span class="inline-block animate-drift-K">K</span>
+      <span class="inline-block animate-drift-Y">Y</span>
+      <span class="inline-block animate-drift-O2">O</span>
+    </div>
+  </div>
+
+  <!-- ================= 佔比高達 120% 高度的巨幅背景 TOKYO 跑馬燈 (時尚英文粗黑體 + 加深綠色陰影 25%) ================= -->
+  <div class="fixed top-1/2 left-0 w-full h-[120vh] -translate-y-1/2 overflow-hidden pointer-events-none select-none z-0 flex items-center justify-center">
+    <div class="bg-marquee-track opacity-[0.35] text-white text-[90vh] font-sans class-black font-black tracking-tighter uppercase flex items-center filter drop-shadow-[0_25px_35px_rgba(16,185,129,0.25)]">
+      <span class="inline-block px-8 animate-drift-T">TOKYO</span>
+      <span class="inline-block px-8 animate-drift-O1">TOKYO</span>
+      <span class="inline-block px-8 animate-drift-K">TOKYO</span>
+      <span class="inline-block px-8 animate-drift-Y">TOKYO</span>
+      <!-- 重複軌道以確保無縫循環 -->
+      <span class="inline-block px-8 animate-drift-T">TOKYO</span>
+      <span class="inline-block px-8 animate-drift-O1">TOKYO</span>
+      <span class="inline-block px-8 animate-drift-K">TOKYO</span>
+      <span class="inline-block px-8 animate-drift-Y">TOKYO</span>
+    </div>
+  </div>
+
+  <!-- 主體網頁容器 -->
+  <div class="max-w-3xl mx-auto px-4 py-8 relative z-10">
+
+    <!-- iOS 通透無框跑馬燈 -->
+    <div class="w-full bg-white/20 border border-white/45 backdrop-blur-sm text-emerald-950 py-3 text-[10px] tracking-[0.25em] uppercase overflow-hidden shadow-sm mb-8 rounded-2xl">
+      <div class="marquee-track">
+        <span>
+          ✦ SUMMER MEMORIES ✦ TOKYO 6 DAYS FINAL TRIP ✦ SHIBUYA BASE ✦ AJISAI HARMONY ✦ MINT FRESHNESS ✦ N'EX EXPRESS DIRECT CONNECT ✦
+        </span>
+        <span>
+          ✦ SUMMER MEMORIES ✦ TOKYO 6 DAYS FINAL TRIP ✦ SHIBUYA BASE ✦ AJISAI HARMONY ✦ MINT FRESHNESS ✦ N'EX EXPRESS DIRECT CONNECT ✦
+        </span>
+      </div>
+    </div>
+
+    <!-- 極致清透毛玻璃主視窗面板 -->
+    <div class="bg-white/20 backdrop-blur-md border border-white/55 rounded-[36px] shadow-[0_30px_90px_rgba(20,50,30,0.06)] overflow-hidden transition-all duration-300 relative text-emerald-950">
       
-      {/* 注入 iOS 通透流光、Apple 精緻標題字動態、以及背景 120% 巨幅大字跑馬燈 CSS */}
-      <style>{`
-        /* 每個單字獨立的物理不規則漂游動畫 */
-        @keyframes letter-drift-T {
-          0%, 100% { transform: translate(0px, 0px) rotate(0deg) scale(1); }
-          25% { transform: translate(-22px, 15px) rotate(-4deg) scale(1.04); }
-          50% { transform: translate(-10px, -28px) rotate(3deg) scale(0.96); }
-          75% { transform: translate(18px, 12px) rotate(-2deg) scale(1.02); }
-        }
-        @keyframes letter-drift-O1 {
-          0%, 100% { transform: translate(0px, 0px) rotate(0deg) scale(1.08); }
-          30% { transform: translate(26px, -18px) rotate(5deg) scale(0.94); }
-          65% { transform: translate(-18px, 20px) rotate(-5deg) scale(1.05); }
-          85% { transform: translate(12px, -9px) rotate(2deg) scale(0.97); }
-        }
-        @keyframes letter-drift-K {
-          0%, 100% { transform: translate(0px, 0px) rotate(0deg) scale(0.96); }
-          20% { transform: translate(-16px, -24px) rotate(-6deg) scale(1.04); }
-          52% { transform: translate(20px, 14px) rotate(4deg) scale(0.93); }
-          78% { transform: translate(-18px, 8px) rotate(-3deg) scale(1.02); }
-        }
-        @keyframes letter-drift-Y {
-          0%, 100% { transform: translate(0px, 0px) rotate(0deg) scale(1.04); }
-          28% { transform: translate(26px, 22px) rotate(6deg) scale(0.94); }
-          58% { transform: translate(-20px, -14px) rotate(-5deg) scale(1.06); }
-          82% { transform: translate(8px, 16px) rotate(2deg) scale(0.96); }
-        }
-        @keyframes letter-drift-O2 {
-          0%, 100% { transform: translate(0px, 0px) rotate(0deg) scale(1.02); }
-          24% { transform: translate(-20px, 18px) rotate(-4deg) scale(1.03); }
-          45% { transform: translate(16px, -26px) rotate(5deg) scale(0.92); }
-          72% { transform: translate(-8px, -12px) rotate(-1deg) scale(1.05); }
-        }
-
-        /* 夏日大自然漸層流動動畫 */
-        @keyframes aurora-flow-1 {
-          0%, 100% { transform: translate(-10%, -10%) scale(1); }
-          50% { transform: translate(15%, 10%) scale(1.25); }
-        }
-        @keyframes aurora-flow-2 {
-          0%, 100% { transform: translate(10%, 15%) scale(1.2); }
-          50% { transform: translate(-15%, -10%) scale(0.85); }
-        }
-        @keyframes pulse-gentle {
-          0%, 100% { opacity: 0.25; }
-          50% { opacity: 0.55; }
-        }
-        
-        /* 120% 高度的巨幅背景 TOKYO 跑馬燈動畫 */
-        @keyframes bg-marquee-infinite {
-          0% { transform: translateX(0%); }
-          100% { transform: translateX(-50%); }
-        }
-
-        /* Apple 官網級別的標題 Reveal 與呼吸擴展動態 */
-        @keyframes apple-title-reveal {
-          0% {
-            opacity: 0;
-            transform: translateY(24px) scale(0.98);
-            letter-spacing: -0.05em;
-            filter: blur(10px);
-          }
-          100% {
-            opacity: 1;
-            transform: translateY(0) scale(1);
-            letter-spacing: -0.012em;
-            filter: blur(0);
-          }
-        }
-
-        .animate-drift-T { animation: letter-drift-T 9s ease-in-out infinite; }
-        .animate-drift-O1 { animation: letter-drift-O1 11s ease-in-out infinite; }
-        .animate-drift-K { animation: letter-drift-K 10s ease-in-out infinite; }
-        .animate-drift-Y { animation: letter-drift-Y 12s ease-in-out infinite; }
-        .animate-drift-O2 { animation: letter-drift-O2 8s ease-in-out infinite; }
-
-        .bg-aurora-1 { animation: aurora-flow-1 20s ease-in-out infinite; }
-        .bg-aurora-2 { animation: aurora-flow-2 24s ease-in-out infinite; }
-        .animate-pulse-gentle { animation: pulse-gentle 6s ease-in-out infinite; }
-        
-        /* 巨幅背景跑馬燈軌道樣式 */
-        .bg-marquee-track {
-          display: flex;
-          width: max-content;
-          animation: bg-marquee-infinite 28s linear infinite;
-        }
-
-        /* 標題流光質感 */
-        .apple-title-fir-tokyo {
-          background: linear-gradient(135deg, #022c22 0%, #064e3b 60%, #0f766e 100%);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          animation: apple-title-reveal 1.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-          transition: letter-spacing 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        .apple-title-fir-trends {
-          background: linear-gradient(135deg, #065f46 0%, #0d9488 70%, #14b8a6 100%);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          animation: apple-title-reveal 1.8s cubic-bezier(0.16, 1, 0.3, 1) 0.15s forwards;
-          transition: letter-spacing 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        /* 融合 image_721624 苔蘚清晨光影的高級底盤 */
-        .moss-premium-bg {
-          background-color: #f0f4f1; /* 清爽薄荷淺綠基底 */
-          background-image: 
-            linear-gradient(180deg, rgba(230, 240, 232, 0.45) 0%, rgba(240, 245, 241, 0.95) 100%), 
-            url('image_721624.png');
-          background-size: cover;
-          background-position: center;
-          background-attachment: fixed;
-          background-blend-mode: overlay;
-        }
-
-        /* 細黑體樣式優化 */
-        .font-sans-light {
-          font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Segoe UI", "PingFang TC", sans-serif;
-          font-weight: 300;
-        }
-        .font-sans-thin {
-          font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Segoe UI", "PingFang TC", sans-serif;
-          font-weight: 200;
-        }
-
-        .scrollbar-none::-webkit-scrollbar {
-          display: none;
-        }
-        .scrollbar-none {
-          -ms-overflow-style: none;
-          scrollbar-width: none;
-        }
-
-        .custom-cursor {
-          pointer-events: none;
-          transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1), height 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-      `}</style>
-
-      {/* 夏日高質感綠色漸層底盤 */}
-      <div className="absolute inset-0 moss-premium-bg z-0" />
-
-      {/* iOS 微光跟隨游標 (桌機版自動延遲流動) */}
-      {cursorVisible && (
-        <div 
-          className={`hidden md:block fixed z-50 rounded-full custom-cursor bg-emerald-400/20 blur-[10px] ${
-            isHovered ? 'w-24 h-24 -translate-x-12 -translate-y-12 bg-teal-400/30' : 'w-12 h-12 -translate-x-6 -translate-y-6'
-          }`}
-          style={{
-            left: `${trailPos.x}px`,
-            top: `${trailPos.y}px`,
-          }}
-        />
-      )}
-
-      {/* ================= 背景夏日不規則液態光暈 ================= */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
-        <div className="absolute top-[10%] left-[-10%] w-[60vw] h-[60vw] rounded-full bg-emerald-300/35 filter blur-[100px] bg-aurora-1" />
-        <div className="absolute bottom-[10%] right-[-10%] w-[65vw] h-[65vw] rounded-full bg-teal-200/30 filter blur-[120px] bg-aurora-2" />
-      </div>
-
-      {/* ================= 白色 TOKYO 英文字母獨立不規則飄游動態（時尚英文粗黑體 + 加深綠色陰影 25%） ================= */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none select-none z-0 flex items-center justify-center">
-        <div className="text-white/[0.38] font-sans font-black text-[25vw] md:text-[21vw] tracking-tighter flex items-center justify-center gap-2 filter drop-shadow-[0_20px_35px_rgba(16,185,129,0.25)]">
-          <span className="inline-block animate-drift-T">T</span>
-          <span className="inline-block animate-drift-O1">O</span>
-          <span className="inline-block animate-drift-K">K</span>
-          <span className="inline-block animate-drift-Y">Y</span>
-          <span className="inline-block animate-drift-O2">O</span>
+      <!-- iOS 簡潔白光頂層導航條 -->
+      <div class="flex items-center justify-between px-8 py-5 border-b border-white/20 bg-white/10">
+        <div class="flex gap-2">
+          <span class="w-3 h-3 rounded-full bg-[#f4a261]/20 border border-[#f4a261]/40"></span>
+          <span class="w-3 h-3 rounded-full bg-[#e9c46a]/20 border border-[#e9c46a]/40"></span>
+          <span class="w-3 h-3 rounded-full bg-[#2a9d8f]/20 border border-[#2a9d8f]/40"></span>
+        </div>
+        <div class="flex items-center gap-4 text-emerald-900/50">
+          <i data-lucide="sun" class="w-4 h-4 hover:text-emerald-850 transition-colors cursor-pointer"></i>
+          <i data-lucide="minus" class="w-4 h-4 hover:text-emerald-850 transition-colors cursor-pointer"></i>
+          <i data-lucide="menu" class="w-4 h-4 hover:text-emerald-850 transition-colors cursor-pointer"></i>
         </div>
       </div>
 
-      {/* ================= 佔比高達 120% 高度的巨幅背景 TOKYO 跑馬燈（時尚英文粗黑體 + 加深綠色陰影 25%，若隱若現） ================= */}
-      <div className="fixed top-1/2 left-0 w-full h-[120vh] -translate-y-1/2 overflow-hidden pointer-events-none select-none z-0 flex items-center justify-center">
-        <div className="bg-marquee-track opacity-[0.35] text-white text-[90vh] font-sans font-black tracking-tighter uppercase flex items-center filter drop-shadow-[0_25px_35px_rgba(16,185,129,0.25)]">
-          <span className="inline-block px-8 animate-drift-T">TOKYO</span>
-          <span className="inline-block px-8 animate-drift-O1">TOKYO</span>
-          <span className="inline-block px-8 animate-drift-K">TOKYO</span>
-          <span className="inline-block px-8 animate-drift-Y">TOKYO</span>
-          {/* 重複軌道以確保無縫循環 */}
-          <span className="inline-block px-8 animate-drift-T">TOKYO</span>
-          <span className="inline-block px-8 animate-drift-O1">TOKYO</span>
-          <span className="inline-block px-8 animate-drift-K">TOKYO</span>
-          <span className="inline-block px-8 animate-drift-Y">TOKYO</span>
+      <!-- 頂部不對稱巨幅呼吸感細黑體大標題 -->
+      <div class="px-8 md:px-14 pt-14 pb-12 border-b border-white/20 group">
+        <div class="flex items-center gap-2 text-[10px] text-emerald-700 tracking-[0.3em] font-bold uppercase mb-3">
+          <i data-lucide="compass" class="w-4 h-4 text-emerald-500"></i> TOKYO.INDIE.CURATED
+        </div>
+        
+        <!-- iOS 精緻細字遮罩 reveal 效果 + Apple 風格呼吸微動效 -->
+        <div class="overflow-hidden">
+          <h1 class="text-6xl md:text-[5.5rem] font-sans font-black tracking-tighter leading-none uppercase apple-title-fir-tokyo group-hover:tracking-normal">
+            TOKYO
+          </h1>
+        </div>
+        <div class="overflow-hidden mt-2">
+          <h2 class="text-5xl md:text-7xl font-sans font-black tracking-tighter leading-none uppercase apple-title-fir-trends group-hover:tracking-wide">
+            TRENDS '26
+          </h2>
+        </div>
+
+        <div class="flex items-end justify-between mt-10 border-t border-white/20 pt-5">
+          <p class="text-emerald-900/80 text-xs font-medium tracking-tight max-w-xs leading-relaxed">
+            東京 6 天 5 夜最終完整版行程表
+          </p>
+          <div class="text-right">
+            <span class="text-3xl font-sans font-normal tracking-tighter text-emerald-950 block">2026</span>
+            <span class="text-[10px] tracking-widest text-emerald-600 font-bold block">06.04 – 06.09</span>
+          </div>
         </div>
       </div>
 
-      {/* 主體網頁容器 */}
-      <div className="max-w-3xl mx-auto px-4 py-8 relative z-10 font-sans-light">
+      <!-- 內頁內容 -->
+      <div class="p-8 md:p-14 space-y-12">
 
-        {/* 極致清透毛玻璃主視窗面板（高度穿透背景大字與跑馬燈） */}
-        <div 
-          className="bg-white/20 backdrop-blur-md border border-white/55 rounded-[36px] shadow-[0_30px_90px_rgba(20,50,30,0.06)] overflow-hidden transition-all duration-300 relative text-emerald-950"
-        >
+        <!-- 基本資訊區塊 Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           
-          {/* iOS 簡潔白光頂層導航條 */}
-          <div className="flex items-center justify-between px-8 py-5 border-b border-white/20 bg-white/10">
-            <div className="flex gap-2">
-              <span className="w-3 h-3 rounded-full bg-[#f4a261]/20 border border-[#f4a261]/40" />
-              <span className="w-3 h-3 rounded-full bg-[#e9c46a]/20 border border-[#e9c46a]/40" />
-              <span className="w-3 h-3 rounded-full bg-[#2a9d8f]/20 border border-[#2a9d8f]/40" />
-            </div>
-            <div className="flex items-center gap-4 text-emerald-900/50">
-              <Sun className="w-4 h-4 hover:text-emerald-850 transition-colors cursor-pointer" />
-              <Minus className="w-4 h-4 hover:text-emerald-850 transition-colors cursor-pointer" />
-              <Menu className="w-4 h-4 hover:text-emerald-850 transition-colors cursor-pointer" />
-            </div>
-          </div>
-
-          {/* 頂部不對稱巨幅呼吸感細黑體大標題 */}
-          <div className="px-8 md:px-14 pt-14 pb-12 border-b border-white/20 group">
-            <div className="flex items-center gap-2 text-[10px] text-emerald-700 tracking-[0.3em] font-bold uppercase mb-3">
-              <Compass className="w-4 h-4 animate-spin-slow text-emerald-500" /> TOKYO.INDIE.CURATED
-            </div>
-            
-            {/* iOS 精緻細字遮罩 reveal 效果 + Apple 風格呼吸微動效 */}
-            <div className="overflow-hidden">
-              <h1 className="text-6xl md:text-[5.5rem] font-sans-thin tracking-tighter leading-none uppercase apple-title-fir-tokyo group-hover:tracking-normal">
-                TOKYO
-              </h1>
-            </div>
-            <div className="overflow-hidden mt-2">
-              <h2 className="text-5xl md:text-7xl font-sans-thin tracking-tighter leading-none uppercase apple-title-fir-trends group-hover:tracking-wide">
-                TRENDS '26
-              </h2>
-            </div>
-
-            <div className="flex items-end justify-between mt-10 border-t border-white/20 pt-5">
-              <p className="text-emerald-900/80 text-xs font-medium tracking-tight max-w-xs leading-relaxed">
-                東京 6 天 5 夜最終完整版行程表
-              </p>
-              <div className="text-right">
-                <span className="text-3xl font-sans-thin tracking-tighter text-emerald-950 block">2026</span>
-                <span className="text-[10px] tracking-widest text-emerald-600 font-bold block">06.04 – 06.09</span>
+          <!-- 航班卡片 -->
+          <div class="bg-white/30 border border-white/45 rounded-3xl p-6 backdrop-blur-sm cursor-default shadow-sm text-emerald-950 flex flex-col justify-between hover:shadow-md transition-all duration-300">
+            <div>
+              <div class="flex items-center justify-between border-b border-white/20 pb-3.5 mb-4">
+                <div class="flex items-center gap-2.5">
+                  <i data-lucide="plane" class="w-4 h-4 text-emerald-500"></i>
+                  <h3 class="text-xs font-bold tracking-[0.15em] text-emerald-900 uppercase">航班資訊</h3>
+                </div>
+                <!-- 機場 Google Map 定位 -->
+                <button 
+                  onclick="handleMapRedirect(event, 'https://www.google.com/maps/search/?api=1&query=成田國際機場+第一航廈')"
+                  class="p-1.5 rounded-full bg-white/40 hover:bg-emerald-100/60 border border-white/50 text-emerald-700 hover:scale-105 active:scale-95 transition-all duration-300"
+                  title="Google Maps 機場定位"
+                >
+                  <i data-lucide="compass" class="w-3.5 h-3.5"></i>
+                </button>
               </div>
-            </div>
-          </div>
-
-          {/* 內頁內容 */}
-          <div className="p-8 md:p-14 space-y-12">
-
-            {/* 基本資訊區塊 Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               
-              {/* 航班卡片 */}
-              <LocalTiltCard 
-                className="bg-white/30 border border-white/45 rounded-3xl p-6 backdrop-blur-sm cursor-default shadow-sm text-emerald-950 flex flex-col justify-between"
-                onMouseEnter={() => setIsHovered(true)}
-                onMouseLeave={() => setIsHovered(false)}
-              >
-                <div>
-                  <div className="flex items-center justify-between border-b border-white/20 pb-3.5 mb-4">
-                    <div className="flex items-center gap-2.5">
-                      <Plane className="w-4 h-4 text-emerald-500" />
-                      <h3 className="text-xs font-bold tracking-[0.15em] text-emerald-900 uppercase">航班資訊</h3>
-                    </div>
-                    {/* 機場 Google Map 導航 Icon */}
-                    <button 
-                      onClick={(e) => handleMapRedirect(e, tripInfo.flights.departure.mapUrl)}
-                      className="p-1.5 rounded-full bg-white/40 hover:bg-emerald-100/60 border border-white/50 text-emerald-700 hover:scale-105 active:scale-95 transition-all duration-300"
-                      title="Google Maps 機場定位"
-                    >
-                      <Compass className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                  
-                  <div className="space-y-4 text-xs font-sans-light">
-                    <div className="relative pl-3 border-l-2 border-emerald-400">
-                      <span className="text-[9px] text-emerald-500 font-bold tracking-wider block mb-1">去程 | {tripInfo.flights.departure.date}</span>
-                      <p className="text-sm font-bold text-emerald-950">{tripInfo.flights.departure.code}</p>
-                      <p className="text-emerald-800 mt-1">{tripInfo.flights.departure.time}</p>
-                      <span className="text-[9px] bg-emerald-100/60 text-emerald-900 font-bold px-2 py-0.5 rounded-full mt-2 inline-block">飛行：{tripInfo.flights.departure.duration}</span>
-                    </div>
-                    
-                    <div className="relative pl-3 border-l-2 border-emerald-300">
-                      <span className="text-[9px] text-teal-600 font-bold tracking-wider block mb-1">回程 | {tripInfo.flights.return.date}</span>
-                      <p className="text-sm font-bold text-emerald-950">{tripInfo.flights.return.code}</p>
-                      <p className="text-emerald-800 mt-1">{tripInfo.flights.return.time}</p>
-                    </div>
-                  </div>
+              <div class="space-y-4 text-xs">
+                <div class="relative pl-3 border-l-2 border-emerald-400">
+                  <span class="text-[9px] text-emerald-500 font-bold tracking-wider block mb-1">去程 | 6/4（四）</span>
+                  <p class="text-sm font-bold text-emerald-950">Scoot TR866</p>
+                  <p class="text-emerald-800 mt-1">06:45 桃園 (TPE) → 11:15 成田 (NRT)</p>
+                  <span class="text-[9px] bg-emerald-100/60 text-emerald-900 font-bold px-2 py-0.5 rounded-full mt-2 inline-block">飛行時間：約 3 小時 30 分</span>
                 </div>
-              </LocalTiltCard>
-
-              {/* 住宿卡片 */}
-              <LocalTiltCard 
-                className="bg-white/30 border border-white/45 rounded-3xl p-6 backdrop-blur-sm cursor-default shadow-sm text-emerald-950 flex flex-col justify-between"
-                onMouseEnter={() => setIsHovered(true)}
-                onMouseLeave={() => setIsHovered(false)}
-              >
-                <div>
-                  <div className="flex items-center justify-between border-b border-white/20 pb-3.5 mb-4">
-                    <div className="flex items-center gap-2.5">
-                      <Hotel className="w-4 h-4 text-emerald-500" />
-                      <h3 className="text-xs font-bold tracking-[0.15em] text-emerald-900 uppercase">住宿資訊</h3>
-                    </div>
-                    {/* 飯店 Google Map 導航 Icon */}
-                    <button 
-                      onClick={(e) => handleMapRedirect(e, tripInfo.hotel.mapUrl)}
-                      className="p-1.5 rounded-full bg-white/40 hover:bg-emerald-100/60 border border-white/50 text-emerald-700 hover:scale-105 active:scale-95 transition-all duration-300"
-                      title="Google Maps 飯店定位"
-                    >
-                      <Compass className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                  
-                  <div className="text-xs font-sans-light">
-                    <p className="text-sm font-bold text-emerald-950 flex items-center justify-between">
-                      {tripInfo.hotel.name}
-                      <span className="text-[9px] font-bold bg-white/40 text-emerald-800 px-2 py-0.5 rounded-full border border-white/10">SHIBUYA</span>
-                    </p>
-                    <div className="grid grid-cols-2 gap-3 my-3.5 text-[10px] bg-white/20 p-3 rounded-2xl border border-white/10">
-                      <div>
-                        <span className="text-emerald-600 block mb-0.5 font-bold">CI_CHECKIN</span>
-                        <span className="font-bold text-emerald-900">{tripInfo.hotel.checkIn.split(' ')[1]}</span>
-                      </div>
-                      <div>
-                        <span className="text-emerald-600 block mb-0.5 font-bold">CO_CHECKOUT</span>
-                        <span className="font-bold text-emerald-900">{tripInfo.hotel.checkOut.split(' ')[1]}</span>
-                      </div>
-                    </div>
-                    <ul className="space-y-1.5 text-emerald-850/80 text-[11px] leading-relaxed">
-                      {tripInfo.hotel.advantages.map((adv, i) => (
-                        <li key={i} className="flex items-start gap-1.5">
-                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-1.5 shrink-0" />
-                          <span>{adv}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-              </LocalTiltCard>
-
-            </div>
-
-            {/* 核心交通提醒 (通透大圓角卡片) */}
-            <div className="bg-white/25 border border-white/45 rounded-3xl p-6 shadow-sm hover:shadow-md transition-all duration-500 flex items-start justify-between">
-              <div className="flex items-start gap-4">
-                <div className="p-3 bg-white/30 rounded-2xl border border-white/40 mt-1 shadow-sm">
-                  <Train className="w-5 h-5 text-emerald-500 animate-pulse" />
-                </div>
-                <div className="space-y-1 font-sans-light">
-                  <h3 className="text-xs font-bold text-emerald-600 tracking-wider uppercase">
-                    //成田機場 ↔ 澀谷 · 精選
-                  </h3>
-                  <p className="text-sm font-bold text-emerald-950">
-                    推薦交通：{tripInfo.traffic.recommend}
-                  </p>
-                  <p className="text-xs text-emerald-900/80 leading-relaxed">
-                    <strong>原因：</strong>{tripInfo.traffic.reason}。去程與回程皆建議搭乘。
-                  </p>
+                
+                <div class="relative pl-3 border-l-2 border-emerald-300">
+                  <span class="text-[9px] text-teal-600 font-bold tracking-wider block mb-1">回程 | 6/9（二）</span>
+                  <p class="text-sm font-bold text-emerald-950">Scoot TR867</p>
+                  <p class="text-emerald-800 mt-1">21:15 成田 (NRT) → 23:55 桃園 (TPE)</p>
                 </div>
               </div>
-              {/* 交通定位 Google Map (定位澀谷站) */}
+            </div>
+          </div>
+
+          <!-- 住宿卡片 -->
+          <div class="bg-white/30 border border-white/45 rounded-3xl p-6 backdrop-blur-sm cursor-default shadow-sm text-emerald-950 flex flex-col justify-between hover:shadow-md transition-all duration-300">
+            <div>
+              <div class="flex items-center justify-between border-b border-white/20 pb-3.5 mb-4">
+                <div class="flex items-center gap-2.5">
+                  <i data-lucide="hotel" class="w-4 h-4 text-emerald-500"></i>
+                  <h3 class="text-xs font-bold tracking-[0.15em] text-emerald-900 uppercase">住宿資訊</h3>
+                </div>
+                <!-- 飯店 Google Map 定位 -->
+                <button 
+                  onclick="handleMapRedirect(event, 'https://www.google.com/maps/search/?api=1&query=BookTeaBed+Shibuya')"
+                  class="p-1.5 rounded-full bg-white/40 hover:bg-emerald-100/60 border border-white/50 text-emerald-700 hover:scale-105 active:scale-95 transition-all duration-300"
+                  title="Google Maps 飯店定位"
+                >
+                  <i data-lucide="compass" class="w-3.5 h-3.5"></i>
+                </button>
+              </div>
+              
+              <div class="text-xs">
+                <p class="text-sm font-bold text-emerald-950 flex items-center justify-between">
+                  BookTeaBed Shibuya
+                  <span class="text-[9px] font-bold bg-white/40 text-emerald-800 px-2 py-0.5 rounded-full border border-white/10">SHIBUYA</span>
+                </p>
+                <div class="grid grid-cols-2 gap-3 my-3.5 text-[10px] bg-white/20 p-3 rounded-2xl border border-white/10">
+                  <div>
+                    <span class="text-emerald-600 block mb-0.5 font-bold">CI_CHECKIN</span>
+                    <span class="font-bold text-emerald-900">2026/6/4（四）15:00 後</span>
+                  </div>
+                  <div>
+                    <span class="text-emerald-600 block mb-0.5 font-bold">CO_CHECKOUT</span>
+                    <span class="font-bold text-emerald-900">2026/6/9（二）10:00 前</span>
+                  </div>
+                </div>
+                <ul class="space-y-1.5 text-emerald-850/80 text-[11px] leading-relaxed list-none pl-0">
+                  <li class="flex items-start gap-1.5">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-1.5 shrink-0"></span>
+                    <span>位於澀谷，回飯店超方便</span>
+                  </li>
+                  <li class="flex items-start gap-1.5">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-1.5 shrink-0"></span>
+                    <span>幾乎所有行程直達</span>
+                  </li>
+                  <li class="flex items-start gap-1.5">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-1.5 shrink-0"></span>
+                    <span>梅雨季很適合（室內選擇多）</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- 核心交通提醒 (通透大圓角卡片) -->
+        <div class="bg-white/25 border border-white/45 rounded-3xl p-6 shadow-sm hover:shadow-md transition-all duration-500 flex items-start justify-between">
+          <div class="flex items-start gap-4">
+            <div class="p-3 bg-white/30 rounded-2xl border border-white/40 mt-1 shadow-sm">
+              <i data-lucide="train" class="w-5 h-5 text-emerald-500"></i>
+            </div>
+            <div class="space-y-1">
+              <h3 class="text-xs font-bold text-emerald-600 tracking-wider uppercase">
+                // 成田機場 ↔ 澀谷 · 精選
+              </h3>
+              <p class="text-sm font-bold text-emerald-950">
+                推薦交通：Narita Express (N’EX)
+              </p>
+              <p class="text-xs text-emerald-900/80 leading-relaxed">
+                <strong>原因：</strong>直達澀谷、不用搬行李轉車、最穩定。建議去回程都搭乘。
+              </p>
+            </div>
+          </div>
+          <!-- 交通定位 Google Map (定位澀谷站) -->
+          <button 
+            onclick="handleMapRedirect(event, 'https://www.google.com/maps/search/?api=1&query=澀谷站')"
+            class="p-2 rounded-full bg-white/40 hover:bg-emerald-100/60 border border-white/50 text-emerald-700 hover:scale-105 active:scale-95 transition-all duration-300 ml-4 shrink-0 mt-2"
+            title="Google Maps 定位澀谷站"
+          >
+            <i data-lucide="compass" class="w-4 h-4"></i>
+          </button>
+        </div>
+
+        <!-- 核心焦點表格 (替代原亮點快速總覽，使其更加前衛有條理) -->
+        <div class="bg-white/15 border border-white/30 rounded-3xl p-6">
+          <h3 class="text-[10px] font-bold text-emerald-800 mb-4 tracking-wider uppercase flex items-center gap-1.5">
+            ✦ 經典行程重點
+          </h3>
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-3" id="highlights-grid">
+            <!-- 亮點卡片將透過 JS 動態注入，確保代碼更簡潔且易維護 -->
+          </div>
+        </div>
+
+        <!-- 每日詳細行程互動區 -->
+        <div class="space-y-6">
+          <div class="flex items-center justify-between border-b border-white/15 pb-4">
+            <h2 class="text-xs font-bold tracking-widest text-emerald-950 uppercase flex items-center gap-2">
+              <i data-lucide="calendar" class="w-4 h-4 text-emerald-500"></i> 
+              行程日程安排
+            </h2>
+            <span class="text-[9px] font-bold text-emerald-600/60 font-mono">CHOOSE DAY //</span>
+          </div>
+
+          <!-- 橫向天數選單 (極簡 iOS 彈性滑動鈕) -->
+          <div class="flex gap-2 overflow-x-auto pb-2 scrollbar-none border-b border-white/10" id="days-nav-tabs">
+            <!-- Tab 按鈕將由 JS 注入 -->
+          </div>
+
+          <!-- 單日行程卡片 -->
+          <div class="bg-white/40 border border-white/50 rounded-[28px] p-6 shadow-sm relative overflow-hidden transition-all duration-500">
+            
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-8 border-b border-white/20 pb-5">
+              <div>
+                <span class="text-[9px] id="active-day-label" class="text-emerald-500 font-bold tracking-wider block">DAY 1 / 6/4（四） //主題</span>
+                <h3 class="text-lg font-bold text-emerald-950 mt-1" id="active-day-theme">澀谷暖身 ＆ 下北澤古著夜</h3>
+              </div>
+              <span class="text-[9px] font-bold bg-emerald-500 text-white px-3.5 py-1.5 rounded-full" id="spots-count-badge">
+                4_SPOTS
+              </span>
+            </div>
+
+            <!-- 時間軸景點容器 -->
+            <div class="relative border-l-2 border-white/40 ml-2 pl-6 space-y-6" id="spots-timeline-container">
+              <!-- 行程節點由 JS 依 activeDay 動態渲染 -->
+            </div>
+
+          </div>
+        </div>
+
+        <!-- 備選美食特別卡片 -->
+        <div class="bg-white/20 border border-white/45 rounded-3xl p-6 cursor-default shadow-sm text-emerald-950 flex flex-col justify-between hover:shadow-md transition-all duration-300">
+          <div>
+            <div class="flex items-center justify-between border-b border-white/20 pb-3.5 mb-4">
+              <div class="flex items-center gap-2">
+                <i data-lucide="heart" class="w-4 h-4 text-emerald-500 animate-pulse"></i>
+                <h3 class="text-xs font-bold tracking-wider text-white">// 備選清單 (有空再吃)</h3>
+              </div>
+              <!-- 備選壽喜燒 Google Map 定位 -->
               <button 
-                onClick={(e) => handleMapRedirect(e, tripInfo.traffic.mapUrl)}
-                className="p-2 rounded-full bg-white/40 hover:bg-emerald-100/60 border border-white/50 text-emerald-700 hover:scale-105 active:scale-95 transition-all duration-300 ml-4 shrink-0 mt-2"
-                title="Google Maps 定位澀谷站"
+                onclick="handleMapRedirect(event, 'https://www.google.com/maps/search/?api=1&query=Sukiyaki+Chikayo+Shibuya')"
+                class="p-1.5 rounded-full bg-white/40 hover:bg-emerald-100/60 border border-white/50 text-emerald-700 hover:scale-105 active:scale-95 transition-all duration-300"
+                title="Google Maps 壽喜燒定位"
               >
-                <Compass className="w-4 h-4" />
+                <i data-lucide="compass" class="w-3.5 h-3.5"></i>
               </button>
             </div>
-
-            {/* 亮點快速總覽 (iOS 霧面塊) */}
-            <div className="bg-white/15 border border-white/30 rounded-3xl p-6">
-              <h3 className="text-[10px] font-bold text-emerald-800 mb-4 tracking-wider uppercase flex items-center gap-1.5">
-                ✦ 經典行程重點
-              </h3>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                {highlights.map((h, idx) => (
-                  <div 
-                    key={idx} 
-                    className="bg-white/45 border border-white/40 p-3 rounded-2xl flex flex-col justify-between hover:border-emerald-300/40 transition-all duration-300 hover:shadow-md shadow-sm transform hover:-translate-y-0.5 relative group/highlight"
-                    onMouseEnter={() => setIsHovered(true)}
-                    onMouseLeave={() => setIsHovered(false)}
-                  >
-                    <div className="flex justify-between items-start gap-1">
-                      <span className="text-[9px] text-emerald-600 font-bold tracking-wider">{h.type}</span>
-                      {/* 極小化外部地圖導航 Icon */}
-                      <button 
-                        onClick={(e) => handleMapRedirect(e, h.mapUrl)}
-                        className="p-1 rounded-full bg-white/50 hover:bg-emerald-100/80 border border-white/30 text-emerald-700 scale-90 opacity-40 group-hover/highlight:opacity-100 transition-all"
-                        title="Google Maps 定位"
-                      >
-                        <ExternalLink className="w-2.5 h-2.5" />
-                      </button>
-                    </div>
-                    <span className="text-xs font-bold text-emerald-950 mt-1.5">{h.spot}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* 每日詳細行程互動區 */}
-            <div className="space-y-6">
-              <div className="flex items-center justify-between border-b border-white/15 pb-4">
-                <h2 className="text-xs font-bold tracking-widest text-emerald-950 uppercase flex items-center gap-2">
-                  <Calendar className="w-4 h-4 text-emerald-500" /> 
-                  行程日程安排
-                </h2>
-                <span className="text-[9px] font-bold text-emerald-600/60">CHOOSE DAY //</span>
-              </div>
-
-              {/* 橫向天數選單 (極簡 iOS 行動滑動鈕) */}
-              <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none border-b border-white/10">
-                {days.map((d, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => {
-                      setActiveDay(idx);
-                      setExpandedSpot(null);
-                    }}
-                    onMouseEnter={() => setIsHovered(true)}
-                    onMouseLeave={() => setIsHovered(false)}
-                    className={`flex-none px-4 py-3.5 transition-all duration-300 flex flex-col items-center min-w-[76px] relative overflow-hidden rounded-2xl border ${
-                      activeDay === idx
-                        ? 'bg-emerald-500 text-white border-emerald-400 font-bold scale-105 shadow-md shadow-emerald-500/10'
-                        : 'bg-white/20 text-emerald-800/60 border-white/10 hover:text-emerald-950 hover:bg-white/45'
-                    }`}
-                  >
-                    <span className="text-[8px] font-bold tracking-widest block mb-0.5">DAY 0{idx + 1}</span>
-                    <span className="text-sm block">{d.date}</span>
-                  </button>
-                ))}
-              </div>
-
-              {/* 單日行程卡片 (磨砂白面板) */}
-              <div className="bg-white/40 border border-white/50 rounded-[28px] p-6 shadow-sm relative overflow-hidden transition-all duration-500">
-                
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-8 border-b border-white/20 pb-5">
-                  <div>
-                    <span className="text-[9px] text-emerald-500 font-bold tracking-wider uppercase block">
-                      {days[activeDay].day} / {days[activeDay].date} //主題
-                    </span>
-                    <h3 className="text-lg font-bold text-emerald-950 mt-1 font-sans">{days[activeDay].theme}</h3>
-                  </div>
-                  <span className="text-[9px] font-bold bg-emerald-500 text-white px-3.5 py-1.5 rounded-full font-mono">
-                    {days[activeDay].spots.length}_SPOTS
-                  </span>
+            <div class="space-y-3">
+              <p class="text-sm font-bold text-emerald-950">壽喜燒｜Sukiyaki Chikayo Shibuya</p>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs mt-2">
+                <div class="bg-white/30 p-3.5 rounded-2xl border border-white/30 hover:border-emerald-300 transition-colors">
+                  <span class="text-emerald-700 font-bold block mb-1">👍 優點</span>
+                  <span class="text-slate-800">最近超紅，空間設計很好看，年輕感很強。</span>
                 </div>
-
-                {/* 時間軸 */}
-                <div className="relative border-l-2 border-white/40 ml-2 pl-6 space-y-6">
-                  {days[activeDay].spots.map((spot, idx) => {
-                    const isExpanded = expandedSpot === idx;
-                    return (
-                      <div key={idx} className="relative">
-                        
-                        {/* 時間軸圓點 */}
-                        <div className="absolute -left-[31px] top-2.5 w-2.5 h-2.5 bg-emerald-400 rounded-full border-2 border-white" />
-                        
-                        {/* 景點主體 */}
-                        <div 
-                          onClick={() => setExpandedSpot(isExpanded ? null : idx)}
-                          onMouseEnter={() => setIsHovered(true)}
-                          onMouseLeave={() => setIsHovered(false)}
-                          className={`cursor-pointer border rounded-3xl p-4.5 transition-all duration-500 hover:-translate-y-0.5 hover:shadow-sm ${getSpotStyle(spot.type)}`}
-                        >
-                          <div className="flex items-start justify-between gap-3">
-                            <div className="space-y-1.5">
-                              <span className="inline-flex items-center gap-1.5 text-[9px] text-emerald-800 font-bold bg-white/40 px-2.5 py-0.5 rounded-full">
-                                <Clock className="w-3 h-3" /> {spot.time}
-                              </span>
-                              <h4 className="text-sm font-bold text-emerald-950 flex items-center gap-2 mt-1">
-                                {getSpotIcon(spot.type)}
-                                {spot.title}
-                              </h4>
-                            </div>
-                            
-                            <div className="flex items-center gap-2.5">
-                              {/* 點擊導航 Icon：一鍵跳轉對應景點的 Google Map 地圖定位 */}
-                              {spot.mapUrl && (
-                                <button 
-                                  onClick={(e) => handleMapRedirect(e, spot.mapUrl)}
-                                  className="p-1.5 rounded-full bg-white/50 hover:bg-emerald-100/80 border border-white/30 text-emerald-700 hover:scale-105 transition-all duration-300 shadow-sm"
-                                  title="Google Maps 定位導航"
-                                >
-                                  <Compass className="w-3.5 h-3.5" />
-                                </button>
-                              )}
-                              <ChevronDown className={`w-4 h-4 transition-transform duration-500 ease-out ${isExpanded ? 'rotate-180 text-emerald-800' : ''}`} />
-                            </div>
-                          </div>
-
-                          {/* 摺疊詳細內容 */}
-                          <div className={`transition-all duration-500 ease-in-out overflow-hidden ${
-                            isExpanded ? 'max-h-[500px] opacity-100 mt-4' : 'max-h-0 opacity-0 mt-0 pointer-events-none'
-                          }`}>
-                            <p className="text-xs text-slate-800 leading-relaxed bg-white/50 p-3.5 rounded-2xl border border-white/30">
-                              {spot.desc}
-                            </p>
-                            
-                            {spot.info && (
-                              <div className="flex items-center gap-2 text-xs text-slate-700 bg-white/30 px-3.5 py-2.5 rounded-2xl border border-white/20 mt-2">
-                                <Info className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                                <span>{spot.info}</span>
-                              </div>
-                            )}
-
-                            {spot.warning && (
-                              <div className="flex items-start gap-2.5 text-xs text-amber-900 bg-amber-500/10 p-3.5 rounded-2xl border border-amber-500/20 mt-2">
-                                <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
-                                <span>{spot.warning}</span>
-                              </div>
-                            )}
-                          </div>
-                          
-                          {!isExpanded && (
-                            <p className="text-xs text-slate-650 line-clamp-1 mt-2">
-                              {spot.desc}
-                            </p>
-                          )}
-                        </div>
-
-                      </div>
-                    );
-                  })}
-                </div>
-
-              </div>
-            </div>
-
-            {/* 備選美食特別卡片 */}
-            <LocalTiltCard 
-              className="border border-white/45 bg-white/20 rounded-3xl p-6 cursor-default shadow-sm text-emerald-950 flex flex-col justify-between"
-              onMouseEnter={() => setIsHovered(true)}
-              onMouseLeave={() => setIsHovered(false)}
-            >
-              <div>
-                <div className="flex items-center justify-between border-b border-white/20 pb-3.5 mb-4">
-                  <div className="flex items-center gap-2">
-                    <Heart className="w-4 h-4 text-emerald-500 animate-pulse" />
-                    <h3 className="text-xs font-bold tracking-wider text-white">// 備選清單 (有空再吃)</h3>
-                  </div>
-                  {/* 備選壽喜燒 Google Map 定位 Icon */}
-                  <button 
-                    onClick={(e) => handleMapRedirect(e, backupFood.mapUrl)}
-                    className="p-1.5 rounded-full bg-white/40 hover:bg-emerald-100/60 border border-white/50 text-emerald-700 hover:scale-105 active:scale-95 transition-all duration-300"
-                    title="Google Maps 壽喜燒定位"
-                  >
-                    <Compass className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-                <div className="space-y-3">
-                  <p className="text-sm font-bold text-emerald-950">{backupFood.title}</p>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs mt-2">
-                    <div className="bg-white/30 p-3.5 rounded-2xl border border-white/30 hover:border-emerald-300 transition-colors">
-                      <span className="text-emerald-700 font-bold block mb-1">👍 優點</span>
-                      <span className="text-slate-800">{backupFood.pros}</span>
-                    </div>
-                    <div className="bg-white/30 p-3.5 rounded-2xl border border-white/30 hover:border-amber-300 transition-colors">
-                      <span className="text-amber-700 font-bold block mb-1">⚠️ 缺點</span>
-                      <span className="text-slate-800">{backupFood.cons}</span>
-                    </div>
-                  </div>
-                  <p className="text-[10px] text-emerald-600/70 italic mt-1.5">目前保留定位：{backupFood.status}</p>
+                <div class="bg-white/30 p-3.5 rounded-2xl border border-white/30 hover:border-amber-300 transition-colors">
+                  <span class="text-amber-700 font-bold block mb-1">⚠️ 缺點</span>
+                  <span class="text-slate-800">容易排隊，座位很少。</span>
                 </div>
               </div>
-            </LocalTiltCard>
-
-          </div>
-
-          {/* 視窗底部控制列 */}
-          <div className="flex items-center justify-between px-8 py-5 border-t border-white/20 bg-white/10 text-[10px] text-emerald-700/60">
-            <div className="flex items-center gap-1">
-              <ArrowLeft className="w-3.5 h-3.5" /> <span>6 DAYS 5 NIGHTS</span>
-            </div>
-            <span className="font-bold">CURATED BY EMERALD CHROME ✦ 2026</span>
-            <div className="flex items-center gap-1">
-              <span>SYSTEM.ONLINE</span> <ArrowRight className="w-3.5 h-3.5" />
+              <p class="text-[10px] text-emerald-600/70 italic mt-1.5">目前保留定位：「有空再吃」版本即可。</p>
             </div>
           </div>
-
-        </div>
-
-        {/* 頁尾 */}
-        <div className="text-center text-[10px] text-emerald-700/50 pt-8 tracking-widest uppercase">
-          <p>-- SUMMER TRIP SPECIAL PLANNING · PREMIUM TOURING SYSTEM --</p>
         </div>
 
       </div>
+
+      <!-- 視窗底部控制列 -->
+      <div class="flex items-center justify-between px-8 py-5 border-t border-white/20 bg-white/10 text-[10px] text-emerald-700/60">
+        <div class="flex items-center gap-1">
+          <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i> <span>6 DAYS 5 NIGHTS</span>
+        </div>
+        <span class="font-bold">CURATED BY EMERALD CHROME ✦ 2026</span>
+        <div class="flex items-center gap-1">
+          <span>SYSTEM.ONLINE</span> <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+        </div>
+      </div>
+
     </div>
-  );
-}
+
+    <!-- 頁尾 -->
+    <div class="text-center text-[10px] text-emerald-700/50 pt-8 tracking-widest uppercase">
+      <p>-- SUMMER TRIP SPECIAL PLANNING · PREMIUM TOURING SYSTEM --</p>
+    </div>
+
+  </div>
+
+  <script>
+    // 原始行程數據
+    const highlights = [
+      { type: "東京夜景", spot: "Shibuya Sky", mapUrl: "https://www.google.com/maps/search/?api=1&query=Shibuya+Sky" },
+      { type: "紫陽花季", spot: "鎌倉 ＋ 文京紫陽花祭", mapUrl: "https://www.google.com/maps/search/?api=1&query=明月院" },
+      { type: "東京年輕人感", spot: "下北澤", mapUrl: "https://www.google.com/maps/search/?api=1&query=下北澤" },
+      { type: "東京 local 感", spot: "高圓寺", mapUrl: "https://www.google.com/maps/search/?api=1&query=高圓寺" },
+      { type: "流行地標", spot: "Harakado", mapUrl: "https://www.google.com/maps/search/?api=1&query=東急プラザ原宿「ハラカド」" },
+      { type: "必吃拉麵", spot: "Jikasei MENSHO", mapUrl: "https://www.google.com/maps/search/?api=1&query=Jikasei+MENSHO" },
+      { type: "必吃壽司", spot: "根室花丸 (KITTE)", mapUrl: "https://www.google.com/maps/search/?api=1&query=根室花丸+KITTE" },
+      { type: "在地美食", spot: "月島文字燒", mapUrl: "https://www.google.com/maps/search/?api=1&query=月島もんじゃ+もへじ+本店" },
+      { type: "湘慢海邊感", spot: "湘南 ＋ 七里濱", mapUrl: "https://www.google.com/maps/search/?api=1&query=七里濱" }
+    ];
+
+    const daysData = [
+      {
+        day: "Day 1",
+        date: "6/4（四）",
+        theme: "澀谷暖身 ＆ 下北澤古著夜",
+        spots: [
+          {
+            time: "中午左右",
+            title: "抵達東京 ＆ 前往澀谷",
+            desc: "成田入境後搭 N’EX 直達澀谷，前往飯店寄放行李。",
+            warning: "第一天下午不要排太滿。因為清晨起飛與長途進城非常消耗體力！",
+            type: "traffic",
+            mapUrl: "https://www.google.com/maps/search/?api=1&query=澀谷站"
+          },
+          {
+            time: "下午",
+            title: "MIYASHITA PARK & Shibuya PARCO",
+            desc: "經典的潮流地標與空中公園，適合第一天暖身並隨意逛街。",
+            type: "spot",
+            mapUrl: "https://www.google.com/maps/search/?api=1&query=MIYASHITA+PARK"
+          },
+          {
+            time: "18:00",
+            title: "晚餐｜Jikasei MENSHO",
+            desc: "東京年輕人超愛的「東京創作系拉麵」，台灣還吃不到！",
+            info: "營業時間：11:00–22:00",
+            type: "food",
+            mapUrl: "https://www.google.com/maps/search/?api=1&query=Jikasei+MENSHO"
+          },
+          {
+            time: "晚上",
+            title: "下北澤 Shimokitazawa",
+            desc: "充滿古著、獨立咖啡店與 Live House 的東京年輕人基地。",
+            warning: "如果太累的話，強烈建議直接回飯店休息，不要硬撐喔！",
+            type: "spot",
+            mapUrl: "https://www.google.com/maps/search/?api=1&query=下北澤"
+          }
+        ]
+      },
+      {
+        day: "Day 2",
+        date: "6/5（五）",
+        theme: "現代美學、潮流新地標與澀谷高空夜景",
+        spots: [
+          {
+            time: "上午",
+            title: "國立新美術館 (六本木)",
+            desc: "黑川紀章設計的波浪玻璃建築本身就非常震撼。可以現場看當期展覽再決定是否購票。",
+            info: "營業時間：10:00–18:00（五、六延長至 20:00）",
+            type: "spot",
+            mapUrl: "https://www.google.com/maps/search/?api=1&query=國立新美術館"
+          },
+          {
+            time: "下午",
+            title: "Harakado (原角)",
+            desc: "東京目前最红的複合式空間，擁有高空露台與各類新興潮流品牌，洋溢 Gen Z 活力。",
+            type: "spot",
+            mapUrl: "https://www.google.com/maps/search/?api=1&query=東急プラザ原宿「ハラカド」"
+          },
+          {
+            time: "傍晚",
+            title: "日枝神社 Hie Shrine",
+            desc: "感受初夏東京的神社氛圍，正好碰上山王祭期間（雖然今日不是大遊行日，但仍有祭典氣氛）。",
+            type: "spot",
+            mapUrl: "https://www.google.com/maps/search/?api=1&query=日枝神社"
+          },
+          {
+            time: "17:00 - 17:30",
+            title: "Shibuya Sky 星空展望台",
+            desc: "魔幻時刻（黃昏過渡到夜景）的最佳入場時間！",
+            warning: "若遇大雨、厚雲或強風，觀景台可能關閉，建議此時段取消。",
+            type: "highlight",
+            mapUrl: "https://www.google.com/maps/search/?api=1&query=Shibuya+Sky"
+          }
+        ]
+      },
+      {
+        day: "Day 3",
+        date: "6/6（六）",
+        theme: "鎌倉紫陽花極致一日遊（核心行程）",
+        spots: [
+          {
+            time: "上午",
+            title: "明月院 Meigetsuin",
+            desc: "正值紫陽花高峰期，親眼見證經典的「明月院藍」。微雨的日子裡，花瓣沾著雨滴反而更漂亮、更精緻！",
+            type: "highlight",
+            mapUrl: "https://www.google.com/maps/search/?api=1&query=明月院"
+          },
+          {
+            time: "中午",
+            title: "長谷寺 Hasedera Temple",
+            desc: "鎌倉另一個紫陽花名所，沿著山路能一邊眺望湘南海岸一邊賞花。",
+            type: "spot",
+            mapUrl: "https://www.google.com/maps/search/?api=1&query=長谷寺"
+          },
+          {
+            time: "下午",
+            title: "江之電體驗 ＆ 七里濱散策",
+            desc: "乘著江之電電車，在七里濱（Shichirigahama）下車，沿著海岸線散步，享受湘南獨特的慵懶海風。",
+            type: "spot",
+            mapUrl: "https://www.google.com/maps/search/?api=1&query=七里濱"
+          },
+          {
+            time: "晚餐",
+            title: "晚餐｜鐵板料理 Tetsubo",
+            desc: "極具湘南 local感與海邊隨性氛圍的鐵板燒，比起東京市區的觀光鐵板料理更有味道與人情味。",
+            type: "food",
+            mapUrl: "https://www.google.com/maps/search/?api=1&query=Tetsubo+Kamakura"
+          }
+        ]
+      },
+      {
+        day: "Day 4",
+        date: "6/7（日）",
+        theme: "文京紫陽花祭、月島文字燒與高圓寺 local 散策",
+        spots: [
+          {
+            time: "10:30",
+            title: "白山神社 (文京紫陽花祭)",
+            desc: "東京市區最熱鬧的夏日祭典！推薦 12:00 觀賞日本箏曲表演，或 13:00–14:00 參與開幕式。現場會有許多 Kitchen Car 攤販與傳統工藝展現。",
+            warning: "建議 14:00 左右離開，因為午後人潮會非常擁擠！",
+            type: "highlight",
+            mapUrl: "https://www.google.com/maps/search/?api=1&query=白山神社"
+          },
+          {
+            time: "14:30 - 15:00",
+            title: "午晚餐｜月島文字燒 (Monja Moheji 旗艦店)",
+            desc: "刻意排在避開正餐的下午時段，可以大幅省去排隊等待的時間，輕鬆享受道地的文字燒！",
+            type: "food",
+            mapUrl: "https://www.google.com/maps/search/?api=1&query=月島もんじゃ+もへじ+本店"
+          },
+          {
+            time: "傍晚",
+            title: "高圓寺 Koenji",
+            desc: "滿滿的古著店、昭和風喫茶店，充滿東京 local 與獨立青年的生活感。",
+            warning: "如果今天走路太多太累，這段可以彈性取消，提早回澀谷休息。",
+            type: "spot",
+            mapUrl: "https://www.google.com/maps/search/?api=1&query=高圓寺"
+          }
+        ]
+      },
+      {
+        day: "Day 5",
+        date: "6/8（一）",
+        theme: "秋葉原文化、丸之內夜景與極品根室花丸",
+        spots: [
+          {
+            time: "上午 - 下午",
+            title: "秋葉原 Akihabara",
+            desc: "懷舊復古遊戲 (Retro Game)、精緻動漫模型與神祕電子商場，感受最獨特的 weird 東京文化。",
+            type: "spot",
+            mapUrl: "https://www.google.com/maps/search/?api=1&query=秋葉原"
+          },
+          {
+            time: "傍晚",
+            title: "丸之內 Marunouchi",
+            desc: "漫步在東京車站紅磚廣場前，在繁華的高樓間欣賞典雅的橘黃燈光，彷彿置身於電影場景中。",
+            type: "spot",
+            mapUrl: "https://www.google.com/maps/search/?api=1&query=東京車站+丸之內"
+          },
+          {
+            time: "16:30 前",
+            title: "晚餐｜迴轉壽司 根室花丸 (KITTE)",
+            desc: "來自北海道的極品海鮮！招牌干貝與生鮮食材極度美味。",
+            warning: "這家店非常受歡迎！請務必在 16:30 前先到 KITTE 未來大樓現場抽取號碼牌，再到附近逛街，否則會等很久！",
+            type: "food",
+            mapUrl: "https://www.google.com/maps/search/?api=1&query=根室花丸+KITTE"
+          }
+        ]
+      },
+      {
+        day: "Day 6",
+        date: "6/9（二）",
+        theme: "吉祥寺森林晨散、澀谷最後採購 ＆ 完美歸國",
+        spots: [
+          {
+            time: "上午",
+            title: "吉祥寺 ＆ 井之頭恩賜公園",
+            desc: "在初夏微陰的早晨散步於井之頭公園，欣賞湖光綠意。這裡有著濃郁的日本文青電影感。",
+            warning: "今天是最後一天，不建議再硬排新宿等複雜、易迷路的大車站行程。",
+            type: "spot",
+            mapUrl: "https://www.google.com/maps/search/?api=1&query=井之頭恩賜公園"
+          },
+          {
+            time: "中午",
+            title: "吉祥寺自由午餐",
+            desc: "可在吉祥寺商圈、口琴橫丁尋找在地小吃 or 藥妝補貨。",
+            type: "food",
+            mapUrl: "https://www.google.com/maps/search/?api=1&query=吉祥寺"
+          },
+          {
+            time: "下午",
+            title: "回澀谷拿行李 ＆ 最後採買",
+            desc: "回到 BookTeaBed 拿行李，做最後的街頭巡禮，接著準備前往成體。",
+            type: "traffic",
+            mapUrl: "https://www.google.com/maps/search/?api=1&query=澀谷站"
+          },
+          {
+            time: "17:30 前",
+            title: "搭乘 N'EX 前往成田機場",
+            desc: "成田機場距離市區偏遠，且國際線 T1 非常寬敞，預留足夠的時間通關，還可以在免稅店輕鬆購物！",
+            warning: "建議最晚 17:30 以前必須離開東京市區！",
+            type: "traffic",
+            mapUrl: "https://www.google.com/maps/search/?api=1&query=成田國際機場+第一航廈"
+          }
+        ]
+      }
+    ];
+
+    let activeDay = 0;
+    let expandedSpot = null;
+
+    // 一鍵導航點擊專用 (防止手風琴觸發開合)
+    function handleMapRedirect(event, url) {
+      event.stopPropagation();
+      if (url) {
+        window.open(url, '_blank', 'noopener,noreferrer');
+      }
+    }
+
+    // 取得節點專屬視覺配色樣式
+    function getSpotStyle(type) {
+      switch (type) {
+        case 'highlight': 
+          return 'border-emerald-200/60 bg-emerald-50/20 hover:bg-emerald-100/30';
+        case 'food': 
+          return 'border-teal-200/60 bg-teal-50/20 hover:bg-teal-100/30';
+        case 'traffic': 
+          return 'border-amber-200/50 bg-amber-50/15 hover:bg-amber-100/25';
+        default: 
+          return 'border-white/20 bg-white/10 hover:bg-white/20';
+      }
+    }
+
+    // 取得節點對應的圖示
+    function getSpotIconSvg(type) {
+      switch (type) {
+        case 'highlight': 
+          return `<i data-lucide="sparkles" class="w-4 h-4 text-emerald-500 animate-pulse inline-block"></i>`;
+        case 'food': 
+          return `<i data-lucide="utensils" class="w-4 h-4 text-teal-600 inline-block"></i>`;
+        case 'traffic': 
+          return `<i data-lucide="train" class="w-4 h-4 text-amber-500 inline-block"></i>`;
+        default: 
+          return `<i data-lucide="map-pin" class="w-4 h-4 text-emerald-400 inline-block"></i>`;
+      }
+    }
+
+    // 初始化亮點表格
+    function initHighlights() {
+      const grid = document.getElementById('highlights-grid');
+      grid.innerHTML = highlights.map(h => `
+        <div class="bg-white/45 border border-white/40 p-3 rounded-2xl flex flex-col justify-between hover:border-emerald-300/40 transition-all duration-300 hover:shadow-md shadow-sm transform hover:-translate-y-0.5 relative group" onclick="handleMapRedirect(event, '${h.mapUrl}')">
+          <div class="flex justify-between items-start gap-1">
+            <span class="text-[9px] text-emerald-600 font-bold tracking-wider">${h.type}</span>
+            <button class="p-1 rounded-full bg-white/50 hover:bg-emerald-100/80 border border-white/30 text-emerald-700 scale-90 opacity-40 group-hover:opacity-100 transition-all">
+              <i data-lucide="external-link" class="w-2.5 h-2.5"></i>
+            </button>
+          </div>
+          <span class="text-xs font-bold text-emerald-950 mt-1.5">${h.spot}</span>
+        </div>
+      `).join('');
+    }
+
+    // 渲染天數 Tabs
+    function renderTabs() {
+      const container = document.getElementById('days-nav-tabs');
+      container.innerHTML = daysData.map((day, idx) => {
+        const isActive = idx === activeDay;
+        return `
+          <button onclick="changeDay(${idx})" class="flex-none px-4 py-3.5 transition-all duration-300 flex flex-col items-center min-w-[76px] relative overflow-hidden rounded-2xl border ${
+            isActive 
+              ? 'bg-emerald-500 text-white border-emerald-400 font-bold scale-105 shadow-md shadow-emerald-500/10' 
+              : 'bg-white/20 text-emerald-800/60 border-white/10 hover:text-emerald-950 hover:bg-white/45'
+          }">
+            <span class="text-[8px] font-bold tracking-widest block mb-0.5">DAY 0${idx + 1}</span>
+            <span class="text-sm block">${day.date}</span>
+          </button>
+        `;
+      }).join('');
+    }
+
+    // 切換天數
+    function changeDay(idx) {
+      activeDay = idx;
+      expandedSpot = null;
+      renderTabs();
+      renderTimeline();
+    }
+
+    // 切換景點展開/收合
+    function toggleSpot(idx) {
+      expandedSpot = expandedSpot === idx ? null : idx;
+      renderTimeline();
+    }
+
+    // 渲染單日行程 Timeline
+    function renderTimeline() {
+      const currentDay = daysData[activeDay];
+      
+      // 更新 Tab 頭部標題與計數
+      document.getElementById('active-day-label').innerText = `${currentDay.day} / ${currentDay.date} //主題`;
+      document.getElementById('active-day-theme').innerText = currentDay.theme;
+      document.getElementById('spots-count-badge').innerText = `${currentDay.spots.length}_SPOTS`;
+
+      // 渲染景點列表
+      const container = document.getElementById('spots-timeline-container');
+      container.innerHTML = currentDay.spots.map((spot, idx) => {
+        const isExpanded = expandedSpot === idx;
+        const styleClass = getSpotStyle(spot.type);
+        const iconHtml = getSpotIconSvg(spot.type);
+
+        return `
+          <div class="relative">
+            <!-- 時間軸圓點 -->
+            <div class="absolute -left-[31px] top-2.5 w-2.5 h-2.5 bg-emerald-400 rounded-full border-2 border-white"></div>
+            
+            <!-- 景點主體 -->
+            <div onclick="toggleSpot(${idx})" class="cursor-pointer border rounded-3xl p-4.5 transition-all duration-500 hover:-translate-y-0.5 hover:shadow-sm ${styleClass}">
+              <div class="flex items-start justify-between gap-3">
+                <div class="space-y-1.5">
+                  <span class="inline-flex items-center gap-1.5 text-[9px] text-emerald-800 font-bold bg-white/40 px-2.5 py-0.5 rounded-full">
+                    <i data-lucide="clock" class="w-3 h-3 inline-block"></i> ${spot.time}
+                  </span>
+                  <h4 class="text-sm font-bold text-emerald-950 flex items-center gap-2 mt-1">
+                    ${iconHtml}
+                    ${spot.title}
+                  </h4>
+                </div>
+                
+                <div class="flex items-center gap-2.5">
+                  ${spot.mapUrl ? `
+                    <button onclick="handleMapRedirect(event, '${spot.mapUrl}')" class="p-1.5 rounded-full bg-white/50 hover:bg-emerald-100/80 border border-white/30 text-emerald-700 hover:scale-105 transition-all duration-300 shadow-sm">
+                      <i data-lucide="compass" class="w-3.5 h-3.5"></i>
+                    </button>
+                  ` : ''}
+                  <i data-lucide="chevron-down" class="w-4 h-4 text-emerald-600 transition-transform duration-500 ${isExpanded ? 'rotate-180 text-emerald-800' : ''}"></i>
+                </div>
+              </div>
+
+              <!-- 摺疊詳細內容 -->
+              <div class="spot-content-transition overflow-hidden ${isExpanded ? 'max-h-[500px] opacity-100 mt-4' : 'max-h-0 opacity-0'}">
+                <p class="text-xs text-slate-800 leading-relaxed bg-white/50 p-3.5 rounded-2xl border border-white/30">
+                  ${spot.desc}
+                </p>
+                
+                ${spot.info ? `
+                  <div class="flex items-center gap-2 text-xs text-slate-700 bg-white/30 px-3.5 py-2.5 rounded-2xl border border-white/20 mt-2">
+                    <i data-lucide="info" class="w-3.5 h-3.5 text-emerald-600 shrink-0"></i>
+                    <span>${spot.info}</span>
+                  </div>
+                ` : ''}
+
+                ${spot.warning ? `
+                  <div class="flex items-start gap-2.5 text-xs text-amber-900 bg-amber-500/10 p-3.5 rounded-2xl border border-amber-500/20 mt-2">
+                    <i data-lucide="alert-triangle" class="w-4 h-4 text-amber-600 shrink-0 mt-0.5"></i>
+                    <span>${spot.warning}</span>
+                  </div>
+                ` : ''}
+              </div>
+              
+              <!-- 隱藏時顯示的單行預覽 -->
+              ${!isExpanded ? `
+                <p class="text-xs text-slate-600 line-clamp-1 mt-2">${spot.desc}</p>
+              ` : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // 每次 DOM 重構後都需要重新初始化 Lucide 圖示
+      lucide.createIcons();
+    }
+
+    // 頁面初始化
+    window.addEventListener('DOMContentLoaded', () => {
+      initHighlights();
+      renderTabs();
+      renderTimeline();
+      
+      // 滑鼠移動跟隨效果 (微光球)
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+      if (!isMobile) {
+        const cursor = document.createElement('div');
+        cursor.className = 'custom-cursor fixed z-50 rounded-full bg-emerald-400/20 blur-[10px] w-12 h-12 -translate-x-6 -translate-y-6 hidden md:block';
+        document.body.appendChild(cursor);
+
+        let mouseX = -100, mouseY = -100;
+        let trailX = -100, trailY = -100;
+
+        window.addEventListener('mousemove', (e) => {
+          mouseX = e.clientX;
+          mouseY = e.clientY;
+          cursor.style.display = 'block';
+        });
+
+        document.addEventListener('mouseleave', () => {
+          cursor.style.display = 'none';
+        });
+
+        function animateCursor() {
+          const dx = mouseX - trailX;
+          const dy = mouseY - trailY;
+          trailX += dx * 0.12;
+          trailY += dy * 0.12;
+          cursor.style.left = `${trailX}px`;
+          cursor.style.top = `${trailY}px`;
+          requestAnimationFrame(animateCursor);
+        }
+        animateCursor();
+
+        // 卡片 Hover 放大微光球效果
+        document.addEventListener('mouseover', (e) => {
+          if (e.target.closest('button') || e.target.closest('.cursor-pointer')) {
+            cursor.classList.add('w-24', 'h-24', '-translate-x-12', '-translate-y-12', 'bg-teal-400/30');
+          } else {
+            cursor.classList.remove('w-24', 'h-24', '-translate-x-12', '-translate-y-12', 'bg-teal-400/30');
+          }
+        });
+      }
+    });
+  </script>
+</body>
+</html>
