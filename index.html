@@ -1,0 +1,1010 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <meta name="Generator" content="Cocoa HTML Writer">
+  <meta name="CocoaVersion" content="2575.7">
+  <style type="text/css">
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica}
+    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; min-height: 14.0px}
+  </style>
+</head>
+<body>
+<p class="p1">import React, { useState, useEffect, useRef } from 'react';</p>
+<p class="p1">import {<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">  </span>Calendar,<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">  </span>MapPin,<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">  </span>Clock,<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">  </span>Plane,<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">  </span>Hotel,<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">  </span>Train,<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">  </span>AlertTriangle,<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">  </span>Info,<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">  </span>Utensils,<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">  </span>Compass,<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">  </span>Heart,</p>
+<p class="p1"><span class="Apple-converted-space">  </span>ChevronDown,</p>
+<p class="p1"><span class="Apple-converted-space">  </span>Sparkles,</p>
+<p class="p1"><span class="Apple-converted-space">  </span>Sun,</p>
+<p class="p1"><span class="Apple-converted-space">  </span>Minus,</p>
+<p class="p1"><span class="Apple-converted-space">  </span>Menu,</p>
+<p class="p1"><span class="Apple-converted-space">  </span>ArrowLeft,</p>
+<p class="p1"><span class="Apple-converted-space">  </span>ArrowRight,</p>
+<p class="p1"><span class="Apple-converted-space">  </span>ExternalLink</p>
+<p class="p1">} from 'lucide-react';</p>
+<p class="p2"><br></p>
+<p class="p1">// 封裝局部 3D 視差懸停卡片元件（適用於 iOS 的細緻擬真陰影）</p>
+<p class="p1">function LocalTiltCard({ children, className = "" }) {</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const cardRef = useRef(null);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const [tiltStyle, setTiltStyle] = useState({ transform: 'perspective(1000px) rotateX(0deg) rotateY(0deg)' });</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>const handleMouseMove = (e) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>if (!cardRef.current) return;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const card = cardRef.current;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const rect = card.getBoundingClientRect();</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const x = (e.clientX - rect.left) / rect.width - 0.5;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const y = (e.clientY - rect.top) / rect.height - 0.5;</p>
+<p class="p2"><span class="Apple-converted-space">    </span></p>
+<p class="p1"><span class="Apple-converted-space">    </span>// 微幅優雅傾斜（4度，保持精緻質感）</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const maxTilt = 4;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const rotateX = -y * maxTilt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const rotateY = x * maxTilt;</p>
+<p class="p2"><span class="Apple-converted-space">    </span></p>
+<p class="p1"><span class="Apple-converted-space">    </span>setTiltStyle({</p>
+<p class="p1"><span class="Apple-converted-space">      </span>transform: `perspective(1000px) rotateX(${rotateX.toFixed(2)}deg) rotateY(${rotateY.toFixed(2)}deg) translateY(-4px)`,</p>
+<p class="p1"><span class="Apple-converted-space">      </span>transition: 'transform 0.15s cubic-bezier(0.25, 1, 0.5, 1)',</p>
+<p class="p1"><span class="Apple-converted-space">      </span>boxShadow: '0 25px 50px rgba(16, 185, 129, 0.08)'</p>
+<p class="p1"><span class="Apple-converted-space">    </span>});</p>
+<p class="p1"><span class="Apple-converted-space">  </span>};</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>const handleMouseLeave = () =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>setTiltStyle({</p>
+<p class="p1"><span class="Apple-converted-space">      </span>transform: 'perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0px)',</p>
+<p class="p1"><span class="Apple-converted-space">      </span>transition: 'transform 0.8s cubic-bezier(0.25, 1, 0.5, 1)',</p>
+<p class="p1"><span class="Apple-converted-space">      </span>boxShadow: '0 4px 20px rgba(0, 0, 0, 0.02)'</p>
+<p class="p1"><span class="Apple-converted-space">    </span>});</p>
+<p class="p1"><span class="Apple-converted-space">  </span>};</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>return (</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div</p>
+<p class="p1"><span class="Apple-converted-space">      </span>ref={cardRef}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>onMouseMove={handleMouseMove}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>onMouseLeave={handleMouseLeave}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>style={tiltStyle}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>className={`transition-all duration-500 ${className}`}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>{children}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>);</p>
+<p class="p1">}</p>
+<p class="p2"><br></p>
+<p class="p1">export default function App() {</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const [activeDay, setActiveDay] = useState(0);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const [expandedSpot, setExpandedSpot] = useState(null);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>// 自訂流光游標狀態（iOS 微光球）</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const [mousePos, setMousePos] = useState({ x: -100, y: -100 });</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const [trailPos, setTrailPos] = useState({ x: -100, y: -100 });</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const [isHovered, setIsHovered] = useState(false);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const [cursorVisible, setCursorVisible] = useState(false);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>// 游標阻尼運動</p>
+<p class="p1"><span class="Apple-converted-space">  </span>useEffect(() =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>let animationFrameId;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const updateTrail = () =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>setTrailPos((prev) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const dx = mousePos.x - prev.x;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const dy = mousePos.y - prev.y;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>return {</p>
+<p class="p1"><span class="Apple-converted-space">          </span>x: prev.x + dx * 0.12,</p>
+<p class="p1"><span class="Apple-converted-space">          </span>y: prev.y + dy * 0.12</p>
+<p class="p1"><span class="Apple-converted-space">        </span>};</p>
+<p class="p1"><span class="Apple-converted-space">      </span>});</p>
+<p class="p1"><span class="Apple-converted-space">      </span>animationFrameId = requestAnimationFrame(updateTrail);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>};</p>
+<p class="p1"><span class="Apple-converted-space">    </span>animationFrameId = requestAnimationFrame(updateTrail);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>return () =&gt; cancelAnimationFrame(animationFrameId);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}, [mousePos]);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>useEffect(() =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const handleMouseMove = (e) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>setMousePos({ x: e.clientX, y: e.clientY });</p>
+<p class="p1"><span class="Apple-converted-space">      </span>if (!cursorVisible) setCursorVisible(true);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>};</p>
+<p class="p2"><span class="Apple-converted-space">    </span></p>
+<p class="p1"><span class="Apple-converted-space">    </span>const handleMouseLeave = () =&gt; setCursorVisible(false);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>window.addEventListener('mousemove', handleMouseMove);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>document.addEventListener('mouseleave', handleMouseLeave);</p>
+<p class="p2"><span class="Apple-converted-space">    </span></p>
+<p class="p1"><span class="Apple-converted-space">    </span>return () =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>window.removeEventListener('mousemove', handleMouseMove);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>document.removeEventListener('mouseleave', handleMouseLeave);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>};</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}, [cursorVisible]);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>// 100% 完整保留行程核心數據 (新增對應之 Google Maps 連結)</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const tripInfo = {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>title: "Tokyo 東京 最終完整版行程",</p>
+<p class="p1"><span class="Apple-converted-space">    </span>date: "2026/6/4（四）– 6/9（二）",</p>
+<p class="p1"><span class="Apple-converted-space">    </span>flights: {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>departure: {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>date: "6/4（四）",</p>
+<p class="p1"><span class="Apple-converted-space">        </span>code: "Scoot TR866",</p>
+<p class="p1"><span class="Apple-converted-space">        </span>time: "06:45 桃園 (TPE) → 11:15 成田 (NRT)",</p>
+<p class="p1"><span class="Apple-converted-space">        </span>duration: "約 3 小時 30 分",</p>
+<p class="p1"><span class="Apple-converted-space">        </span>mapUrl: "https://www.google.com/maps/search/?api=1&amp;query=成田國際機場+第一航廈"</p>
+<p class="p1"><span class="Apple-converted-space">      </span>},</p>
+<p class="p1"><span class="Apple-converted-space">      </span>return: {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>date: "6/9（二）",</p>
+<p class="p1"><span class="Apple-converted-space">        </span>code: "Scoot TR867",</p>
+<p class="p1"><span class="Apple-converted-space">        </span>time: "21:15 成田 (NRT) → 23:55 桃園 (TPE)",</p>
+<p class="p1"><span class="Apple-converted-space">        </span>mapUrl: "https://www.google.com/maps/search/?api=1&amp;query=成田國際機場+第一航廈"</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>},</p>
+<p class="p1"><span class="Apple-converted-space">    </span>hotel: {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>name: "BookTeaBed Shibuya",</p>
+<p class="p1"><span class="Apple-converted-space">      </span>checkIn: "2026/6/4（四）15:00 後",</p>
+<p class="p1"><span class="Apple-converted-space">      </span>checkOut: "2026/6/9（二）10:00 前",</p>
+<p class="p1"><span class="Apple-converted-space">      </span>advantages: ["位於澀谷，回飯店超方便", "幾乎所有行程直達", "梅雨季很適合（室內選擇多）"],</p>
+<p class="p1"><span class="Apple-converted-space">      </span>mapUrl: "https://www.google.com/maps/search/?api=1&amp;query=BookTeaBed+Shibuya"</p>
+<p class="p1"><span class="Apple-converted-space">    </span>},</p>
+<p class="p1"><span class="Apple-converted-space">    </span>traffic: {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>route: "成田 ↔ 澀谷",</p>
+<p class="p1"><span class="Apple-converted-space">      </span>recommend: "Narita Express (N’EX)",</p>
+<p class="p1"><span class="Apple-converted-space">      </span>reason: "直達澀谷、不用搬行李轉車、最穩定",</p>
+<p class="p1"><span class="Apple-converted-space">      </span>suggestion: "去回程都搭乘。",</p>
+<p class="p1"><span class="Apple-converted-space">      </span>mapUrl: "https://www.google.com/maps/search/?api=1&amp;query=澀谷站"</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">  </span>};</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>const highlights = [</p>
+<p class="p1"><span class="Apple-converted-space">    </span>{ type: "東京夜景", spot: "Shibuya Sky", mapUrl: "https://www.google.com/maps/search/?api=1&amp;query=Shibuya+Sky" },</p>
+<p class="p1"><span class="Apple-converted-space">    </span>{ type: "紫陽花季", spot: "鎌倉 ＋ 文京紫陽花祭", mapUrl: "https://www.google.com/maps/search/?api=1&amp;query=明月院" },</p>
+<p class="p1"><span class="Apple-converted-space">    </span>{ type: "東京年輕人感", spot: "下北澤", mapUrl: "https://www.google.com/maps/search/?api=1&amp;query=下北澤" },</p>
+<p class="p1"><span class="Apple-converted-space">    </span>{ type: "東京 local 感", spot: "高圓寺", mapUrl: "https://www.google.com/maps/search/?api=1&amp;query=高圓寺" },</p>
+<p class="p1"><span class="Apple-converted-space">    </span>{ type: "流行地標", spot: "Harakado", mapUrl: "https://www.google.com/maps/search/?api=1&amp;query=東急プラザ原宿「ハラカド」" },</p>
+<p class="p1"><span class="Apple-converted-space">    </span>{ type: "必吃拉麵", spot: "Jikasei MENSHO", mapUrl: "https://www.google.com/maps/search/?api=1&amp;query=Jikasei+MENSHO" },</p>
+<p class="p1"><span class="Apple-converted-space">    </span>{ type: "必吃壽司", spot: "根室花丸 (KITTE)", mapUrl: "https://www.google.com/maps/search/?api=1&amp;query=根室花丸+KITTE" },</p>
+<p class="p1"><span class="Apple-converted-space">    </span>{ type: "在地美食", spot: "月島文字燒", mapUrl: "https://www.google.com/maps/search/?api=1&amp;query=月島もんじゃ+もへじ+本店" },</p>
+<p class="p1"><span class="Apple-converted-space">    </span>{ type: "湘慢海邊感", spot: "湘南 ＋ 七里濱", mapUrl: "https://www.google.com/maps/search/?api=1&amp;query=七里濱" }</p>
+<p class="p1"><span class="Apple-converted-space">  </span>];</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>const days = [</p>
+<p class="p1"><span class="Apple-converted-space">    </span>{</p>
+<p class="p1"><span class="Apple-converted-space">      </span>day: "Day 1",</p>
+<p class="p1"><span class="Apple-converted-space">      </span>date: "6/4（四）",</p>
+<p class="p1"><span class="Apple-converted-space">      </span>theme: "澀谷暖身 ＆ 下北澤古著夜",</p>
+<p class="p1"><span class="Apple-converted-space">      </span>spots: [</p>
+<p class="p1"><span class="Apple-converted-space">        </span>{</p>
+<p class="p1"><span class="Apple-converted-space">          </span>time: "中午左右",</p>
+<p class="p1"><span class="Apple-converted-space">          </span>title: "抵達東京 ＆ 前往澀谷",</p>
+<p class="p1"><span class="Apple-converted-space">          </span>desc: "成田入境後搭 N’EX 直達澀谷，前往飯店寄放行李。",</p>
+<p class="p1"><span class="Apple-converted-space">          </span>warning: "第一天下午不要排太滿。因為清晨起飛與長途進城非常消耗體力！",</p>
+<p class="p1"><span class="Apple-converted-space">          </span>type: "traffic",</p>
+<p class="p1"><span class="Apple-converted-space">          </span>mapUrl: "https://www.google.com/maps/search/?api=1&amp;query=澀谷站"</p>
+<p class="p1"><span class="Apple-converted-space">        </span>},</p>
+<p class="p1"><span class="Apple-converted-space">        </span>{</p>
+<p class="p1"><span class="Apple-converted-space">          </span>time: "下午",</p>
+<p class="p1"><span class="Apple-converted-space">          </span>title: "MIYASHITA PARK &amp; Shibuya PARCO",</p>
+<p class="p1"><span class="Apple-converted-space">          </span>desc: "經典的潮流地標與空中公園，適合第一天暖身並隨意逛街。",</p>
+<p class="p1"><span class="Apple-converted-space">          </span>type: "spot",</p>
+<p class="p1"><span class="Apple-converted-space">          </span>mapUrl: "https://www.google.com/maps/search/?api=1&amp;query=MIYASHITA+PARK"</p>
+<p class="p1"><span class="Apple-converted-space">        </span>},</p>
+<p class="p1"><span class="Apple-converted-space">        </span>{</p>
+<p class="p1"><span class="Apple-converted-space">          </span>time: "18:00",</p>
+<p class="p1"><span class="Apple-converted-space">          </span>title: "晚餐｜Jikasei MENSHO",</p>
+<p class="p1"><span class="Apple-converted-space">          </span>desc: "東京年輕人超愛的「東京創作系拉麵」，台灣還吃不到！",</p>
+<p class="p1"><span class="Apple-converted-space">          </span>info: "營業時間：11:00–22:00",</p>
+<p class="p1"><span class="Apple-converted-space">          </span>type: "food",</p>
+<p class="p1"><span class="Apple-converted-space">          </span>mapUrl: "https://www.google.com/maps/search/?api=1&amp;query=Jikasei+MENSHO"</p>
+<p class="p1"><span class="Apple-converted-space">        </span>},</p>
+<p class="p1"><span class="Apple-converted-space">        </span>{</p>
+<p class="p1"><span class="Apple-converted-space">          </span>time: "晚上",</p>
+<p class="p1"><span class="Apple-converted-space">          </span>title: "下北澤 Shimokitazawa",</p>
+<p class="p1"><span class="Apple-converted-space">          </span>desc: "充滿古著、獨立咖啡店與 Live House 的東京年輕人基地。",</p>
+<p class="p1"><span class="Apple-converted-space">          </span>warning: "如果太累的話，強烈建議直接回飯店休息，不要硬撐喔！",</p>
+<p class="p1"><span class="Apple-converted-space">          </span>type: "spot",</p>
+<p class="p1"><span class="Apple-converted-space">          </span>mapUrl: "https://www.google.com/maps/search/?api=1&amp;query=下北澤"</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>]</p>
+<p class="p1"><span class="Apple-converted-space">    </span>},</p>
+<p class="p1"><span class="Apple-converted-space">    </span>{</p>
+<p class="p1"><span class="Apple-converted-space">      </span>day: "Day 2",</p>
+<p class="p1"><span class="Apple-converted-space">      </span>date: "6/5（五）",</p>
+<p class="p1"><span class="Apple-converted-space">      </span>theme: "現代美學、潮流新地標與澀谷高空夜景",</p>
+<p class="p1"><span class="Apple-converted-space">      </span>spots: [</p>
+<p class="p1"><span class="Apple-converted-space">        </span>{</p>
+<p class="p1"><span class="Apple-converted-space">          </span>time: "上午",</p>
+<p class="p1"><span class="Apple-converted-space">          </span>title: "國立新美術館 (六本木)",</p>
+<p class="p1"><span class="Apple-converted-space">          </span>desc: "黑川紀章設計的波浪玻璃建築本身就非常震撼。可以現場看當期展覽再決定是否購票。",</p>
+<p class="p1"><span class="Apple-converted-space">          </span>info: "營業時間：10:00–18:00（五、六延長至 20:00）",</p>
+<p class="p1"><span class="Apple-converted-space">          </span>type: "spot",</p>
+<p class="p1"><span class="Apple-converted-space">          </span>mapUrl: "https://www.google.com/maps/search/?api=1&amp;query=國立新美術館"</p>
+<p class="p1"><span class="Apple-converted-space">        </span>},</p>
+<p class="p1"><span class="Apple-converted-space">        </span>{</p>
+<p class="p1"><span class="Apple-converted-space">          </span>time: "下午",</p>
+<p class="p1"><span class="Apple-converted-space">          </span>title: "Harakado (原角)",</p>
+<p class="p1"><span class="Apple-converted-space">          </span>desc: "東京目前最红的複合式空間，擁有高空露台與各類新興潮流品牌，洋溢 Gen Z 活力。",</p>
+<p class="p1"><span class="Apple-converted-space">          </span>type: "spot",</p>
+<p class="p1"><span class="Apple-converted-space">          </span>mapUrl: "https://www.google.com/maps/search/?api=1&amp;query=東急プラザ原宿「ハラカド」"</p>
+<p class="p1"><span class="Apple-converted-space">        </span>},</p>
+<p class="p1"><span class="Apple-converted-space">        </span>{</p>
+<p class="p1"><span class="Apple-converted-space">          </span>time: "傍晚",</p>
+<p class="p1"><span class="Apple-converted-space">          </span>title: "日枝神社 Hie Shrine",</p>
+<p class="p1"><span class="Apple-converted-space">          </span>desc: "感受初夏東京的神社氛圍，正好碰上山王祭期間（雖然今日不是大遊行日，但仍有祭典氣氛）。",</p>
+<p class="p1"><span class="Apple-converted-space">          </span>type: "spot",</p>
+<p class="p1"><span class="Apple-converted-space">          </span>mapUrl: "https://www.google.com/maps/search/?api=1&amp;query=日枝神社"</p>
+<p class="p1"><span class="Apple-converted-space">        </span>},</p>
+<p class="p1"><span class="Apple-converted-space">        </span>{</p>
+<p class="p1"><span class="Apple-converted-space">          </span>time: "17:00 - 17:30",</p>
+<p class="p1"><span class="Apple-converted-space">          </span>title: "Shibuya Sky 星空展望台",</p>
+<p class="p1"><span class="Apple-converted-space">          </span>desc: "魔幻時刻（黃昏過渡到夜景）的最佳入場時間！",</p>
+<p class="p1"><span class="Apple-converted-space">          </span>warning: "若遇大雨、厚雲或強風，觀景台可能關閉，建議此時段取消。",</p>
+<p class="p1"><span class="Apple-converted-space">          </span>type: "highlight",</p>
+<p class="p1"><span class="Apple-converted-space">          </span>mapUrl: "https://www.google.com/maps/search/?api=1&amp;query=Shibuya+Sky"</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>]</p>
+<p class="p1"><span class="Apple-converted-space">    </span>},</p>
+<p class="p1"><span class="Apple-converted-space">    </span>{</p>
+<p class="p1"><span class="Apple-converted-space">      </span>day: "Day 3",</p>
+<p class="p1"><span class="Apple-converted-space">      </span>date: "6/6（六）",</p>
+<p class="p1"><span class="Apple-converted-space">      </span>theme: "鎌倉紫陽花極致一日遊（核心行程）",</p>
+<p class="p1"><span class="Apple-converted-space">      </span>spots: [</p>
+<p class="p1"><span class="Apple-converted-space">        </span>{</p>
+<p class="p1"><span class="Apple-converted-space">          </span>time: "上午",</p>
+<p class="p1"><span class="Apple-converted-space">          </span>title: "明月院 Meigetsuin",</p>
+<p class="p1"><span class="Apple-converted-space">          </span>desc: "正值紫陽花高峰期，親眼見證經典的「明月院藍」。微雨的日子裡，花瓣沾著雨滴反而更漂亮、更精緻！",</p>
+<p class="p1"><span class="Apple-converted-space">          </span>type: "highlight",</p>
+<p class="p1"><span class="Apple-converted-space">          </span>mapUrl: "https://www.google.com/maps/search/?api=1&amp;query=明月院"</p>
+<p class="p1"><span class="Apple-converted-space">        </span>},</p>
+<p class="p1"><span class="Apple-converted-space">        </span>{</p>
+<p class="p1"><span class="Apple-converted-space">          </span>time: "中午",</p>
+<p class="p1"><span class="Apple-converted-space">          </span>title: "長谷寺 Hasedera Temple",</p>
+<p class="p1"><span class="Apple-converted-space">          </span>desc: "鎌倉另一個紫陽花名所，沿著山路能一邊眺望湘南海岸一邊賞花。",</p>
+<p class="p1"><span class="Apple-converted-space">          </span>type: "spot",</p>
+<p class="p1"><span class="Apple-converted-space">          </span>mapUrl: "https://www.google.com/maps/search/?api=1&amp;query=長谷寺"</p>
+<p class="p1"><span class="Apple-converted-space">        </span>},</p>
+<p class="p1"><span class="Apple-converted-space">        </span>{</p>
+<p class="p1"><span class="Apple-converted-space">          </span>time: "下午",</p>
+<p class="p1"><span class="Apple-converted-space">          </span>title: "江之電體驗 ＆ 七里濱散策",</p>
+<p class="p1"><span class="Apple-converted-space">          </span>desc: "乘著江之電電車，在七里濱（Shichirigahama）下車，沿著海岸線散步，享受湘南獨特的慵懶海風。",</p>
+<p class="p1"><span class="Apple-converted-space">          </span>type: "spot",</p>
+<p class="p1"><span class="Apple-converted-space">          </span>mapUrl: "https://www.google.com/maps/search/?api=1&amp;query=七里濱"</p>
+<p class="p1"><span class="Apple-converted-space">        </span>},</p>
+<p class="p1"><span class="Apple-converted-space">        </span>{</p>
+<p class="p1"><span class="Apple-converted-space">          </span>time: "晚餐",</p>
+<p class="p1"><span class="Apple-converted-space">          </span>title: "晚餐｜鐵板料理 Tetsubo",</p>
+<p class="p1"><span class="Apple-converted-space">          </span>desc: "極具湘南 local感與海邊隨性氛圍的鐵板燒，比起東京市區的觀光鐵板料理更有味道與人情味。",</p>
+<p class="p1"><span class="Apple-converted-space">          </span>type: "food",</p>
+<p class="p1"><span class="Apple-converted-space">          </span>mapUrl: "https://www.google.com/maps/search/?api=1&amp;query=Tetsubo+Kamakura"</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>]</p>
+<p class="p1"><span class="Apple-converted-space">    </span>},</p>
+<p class="p1"><span class="Apple-converted-space">    </span>{</p>
+<p class="p1"><span class="Apple-converted-space">      </span>day: "Day 4",</p>
+<p class="p1"><span class="Apple-converted-space">      </span>date: "6/7（日）",</p>
+<p class="p1"><span class="Apple-converted-space">      </span>theme: "文京紫陽花祭、月島文字燒與高圓寺 local 散策",</p>
+<p class="p1"><span class="Apple-converted-space">      </span>spots: [</p>
+<p class="p1"><span class="Apple-converted-space">        </span>{</p>
+<p class="p1"><span class="Apple-converted-space">          </span>time: "10:30",</p>
+<p class="p1"><span class="Apple-converted-space">          </span>title: "白山神社 (文京紫陽花祭)",</p>
+<p class="p1"><span class="Apple-converted-space">          </span>desc: "東京市區最熱鬧的夏日祭典！推薦 12:00 觀賞日本箏曲表演，或 13:00–14:00 參與開幕式。現場會有許多 Kitchen Car 攤販與傳統工藝展現。",</p>
+<p class="p1"><span class="Apple-converted-space">          </span>warning: "建議 14:00 左右離開，因為午後人潮會非常擁擠！",</p>
+<p class="p1"><span class="Apple-converted-space">          </span>type: "highlight",</p>
+<p class="p1"><span class="Apple-converted-space">          </span>mapUrl: "https://www.google.com/maps/search/?api=1&amp;query=白山神社"</p>
+<p class="p1"><span class="Apple-converted-space">        </span>},</p>
+<p class="p1"><span class="Apple-converted-space">        </span>{</p>
+<p class="p1"><span class="Apple-converted-space">          </span>time: "14:30 - 15:00",</p>
+<p class="p1"><span class="Apple-converted-space">          </span>title: "午晚餐｜月島文字燒 (Monja Moheji 旗艦店)",</p>
+<p class="p1"><span class="Apple-converted-space">          </span>desc: "刻意排在避開正餐的下午時段，可以大幅省去排隊等待的時間，輕鬆享受道地的文字燒！",</p>
+<p class="p1"><span class="Apple-converted-space">          </span>type: "food",</p>
+<p class="p1"><span class="Apple-converted-space">          </span>mapUrl: "https://www.google.com/maps/search/?api=1&amp;query=月島もんじゃ+もへじ+本店"</p>
+<p class="p1"><span class="Apple-converted-space">        </span>},</p>
+<p class="p1"><span class="Apple-converted-space">        </span>{</p>
+<p class="p1"><span class="Apple-converted-space">          </span>time: "傍晚",</p>
+<p class="p1"><span class="Apple-converted-space">          </span>title: "高圓寺 Koenji",</p>
+<p class="p1"><span class="Apple-converted-space">          </span>desc: "滿滿的古著店、昭和風喫茶店，充滿東京 local 與獨立青年的生活感。",</p>
+<p class="p1"><span class="Apple-converted-space">          </span>warning: "如果今天走路太多太累，這段可以彈性取消，提早回澀谷休息。",</p>
+<p class="p1"><span class="Apple-converted-space">          </span>type: "spot",</p>
+<p class="p1"><span class="Apple-converted-space">          </span>mapUrl: "https://www.google.com/maps/search/?api=1&amp;query=高圓寺"</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>]</p>
+<p class="p1"><span class="Apple-converted-space">    </span>},</p>
+<p class="p1"><span class="Apple-converted-space">    </span>{</p>
+<p class="p1"><span class="Apple-converted-space">      </span>day: "Day 5",</p>
+<p class="p1"><span class="Apple-converted-space">      </span>date: "6/8（一）",</p>
+<p class="p1"><span class="Apple-converted-space">      </span>theme: "秋葉原文化、丸之內夜景與極品根室花丸",</p>
+<p class="p1"><span class="Apple-converted-space">      </span>spots: [</p>
+<p class="p1"><span class="Apple-converted-space">        </span>{</p>
+<p class="p1"><span class="Apple-converted-space">          </span>time: "上午 - 下午",</p>
+<p class="p1"><span class="Apple-converted-space">          </span>title: "秋葉原 Akihabara",</p>
+<p class="p1"><span class="Apple-converted-space">          </span>desc: "懷舊復古遊戲 (Retro Game)、精緻動漫模型與神祕電子商場，感受最獨特的 weird 東京文化。",</p>
+<p class="p1"><span class="Apple-converted-space">          </span>type: "spot",</p>
+<p class="p1"><span class="Apple-converted-space">          </span>mapUrl: "https://www.google.com/maps/search/?api=1&amp;query=秋葉原"</p>
+<p class="p1"><span class="Apple-converted-space">        </span>},</p>
+<p class="p1"><span class="Apple-converted-space">        </span>{</p>
+<p class="p1"><span class="Apple-converted-space">          </span>time: "傍晚",</p>
+<p class="p1"><span class="Apple-converted-space">          </span>title: "丸之內 Marunouchi",</p>
+<p class="p1"><span class="Apple-converted-space">          </span>desc: "漫步在東京車站紅磚廣場前，在繁華的高樓間欣賞典雅的橘黃燈光，彷彿置身於電影場景中。",</p>
+<p class="p1"><span class="Apple-converted-space">          </span>type: "spot",</p>
+<p class="p1"><span class="Apple-converted-space">          </span>mapUrl: "https://www.google.com/maps/search/?api=1&amp;query=東京車站+丸之內"</p>
+<p class="p1"><span class="Apple-converted-space">        </span>},</p>
+<p class="p1"><span class="Apple-converted-space">        </span>{</p>
+<p class="p1"><span class="Apple-converted-space">          </span>time: "16:30 前",</p>
+<p class="p1"><span class="Apple-converted-space">          </span>title: "晚餐｜迴轉壽司 根室花丸 (KITTE)",</p>
+<p class="p1"><span class="Apple-converted-space">          </span>desc: "來自北海道的極品海鮮！招牌干貝與生鮮食材極度美味。",</p>
+<p class="p1"><span class="Apple-converted-space">          </span>warning: "這家店非常受歡迎！請務必在 16:30 前先到 KITTE 未來大樓現場抽取號碼牌，再到附近逛街，否則會等很久！",</p>
+<p class="p1"><span class="Apple-converted-space">          </span>type: "food",</p>
+<p class="p1"><span class="Apple-converted-space">          </span>mapUrl: "https://www.google.com/maps/search/?api=1&amp;query=根室花丸+KITTE"</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>]</p>
+<p class="p1"><span class="Apple-converted-space">    </span>},</p>
+<p class="p1"><span class="Apple-converted-space">    </span>{</p>
+<p class="p1"><span class="Apple-converted-space">      </span>day: "Day 6",</p>
+<p class="p1"><span class="Apple-converted-space">      </span>date: "6/9（二）",</p>
+<p class="p1"><span class="Apple-converted-space">      </span>theme: "吉祥寺森林晨散、澀谷最後採購 ＆ 完美歸國",</p>
+<p class="p1"><span class="Apple-converted-space">      </span>spots: [</p>
+<p class="p1"><span class="Apple-converted-space">        </span>{</p>
+<p class="p1"><span class="Apple-converted-space">          </span>time: "上午",</p>
+<p class="p1"><span class="Apple-converted-space">          </span>title: "吉祥寺 ＆ 井之頭恩賜公園",</p>
+<p class="p1"><span class="Apple-converted-space">          </span>desc: "在初夏微陰的早晨散步於井之頭公園，欣賞湖光綠意。這裡有著濃郁的日本文青電影感。",</p>
+<p class="p1"><span class="Apple-converted-space">          </span>warning: "今天是最後一天，不建議再硬排新宿等複雜、易迷路的大車站行程。",</p>
+<p class="p1"><span class="Apple-converted-space">          </span>type: "spot",</p>
+<p class="p1"><span class="Apple-converted-space">          </span>mapUrl: "https://www.google.com/maps/search/?api=1&amp;query=井之頭恩賜公園"</p>
+<p class="p1"><span class="Apple-converted-space">        </span>},</p>
+<p class="p1"><span class="Apple-converted-space">        </span>{</p>
+<p class="p1"><span class="Apple-converted-space">          </span>time: "中午",</p>
+<p class="p1"><span class="Apple-converted-space">          </span>title: "吉祥寺自由午餐",</p>
+<p class="p1"><span class="Apple-converted-space">          </span>desc: "可在吉祥寺商圈、口琴橫丁尋找在地小吃 or 藥妝補貨。",</p>
+<p class="p1"><span class="Apple-converted-space">          </span>type: "food",</p>
+<p class="p1"><span class="Apple-converted-space">          </span>mapUrl: "https://www.google.com/maps/search/?api=1&amp;query=吉祥寺"</p>
+<p class="p1"><span class="Apple-converted-space">        </span>},</p>
+<p class="p1"><span class="Apple-converted-space">        </span>{</p>
+<p class="p1"><span class="Apple-converted-space">          </span>time: "下午",</p>
+<p class="p1"><span class="Apple-converted-space">          </span>title: "回澀谷拿行李 ＆ 最後採買",</p>
+<p class="p1"><span class="Apple-converted-space">          </span>desc: "回到 BookTeaBed 拿行李，做最後的街頭巡禮，接著準備前往成體。",</p>
+<p class="p1"><span class="Apple-converted-space">          </span>type: "traffic",</p>
+<p class="p1"><span class="Apple-converted-space">          </span>mapUrl: "https://www.google.com/maps/search/?api=1&amp;query=澀谷站"</p>
+<p class="p1"><span class="Apple-converted-space">        </span>},</p>
+<p class="p1"><span class="Apple-converted-space">        </span>{</p>
+<p class="p1"><span class="Apple-converted-space">          </span>time: "17:30 前",</p>
+<p class="p1"><span class="Apple-converted-space">          </span>title: "搭乘 N'EX 前往成田機場",</p>
+<p class="p1"><span class="Apple-converted-space">          </span>desc: "成田機場距離市區偏遠，且國際線 T1 非常寬敞，預留足夠的時間通關，還可以在免稅店輕鬆購物！",</p>
+<p class="p1"><span class="Apple-converted-space">          </span>warning: "建議最晚 17:30 以前必須離開東京市區！",</p>
+<p class="p1"><span class="Apple-converted-space">          </span>type: "traffic",</p>
+<p class="p1"><span class="Apple-converted-space">          </span>mapUrl: "https://www.google.com/maps/search/?api=1&amp;query=成田國際機場+第一航廈"</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>]</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">  </span>];</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>const backupFood = {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>title: "備選美食：Sukiyaki Chikayo Shibuya (壽喜燒)",</p>
+<p class="p1"><span class="Apple-converted-space">    </span>pros: "最近在社群極紅，裝潢美學極好，年輕質感滿分。",</p>
+<p class="p1"><span class="Apple-converted-space">    </span>cons: "位置極少、很容易排長隊。",</p>
+<p class="p1"><span class="Apple-converted-space">    </span>status: "「有空再吃」的備案即可",</p>
+<p class="p1"><span class="Apple-converted-space">    </span>mapUrl: "https://www.google.com/maps/search/?api=1&amp;query=Sukiyaki+Chikayo+Shibuya"</p>
+<p class="p1"><span class="Apple-converted-space">  </span>};</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>const getSpotStyle = (type) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>switch (type) {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>case 'highlight':<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>return 'border-emerald-200/60 bg-emerald-50/20 hover:bg-emerald-100/30';</p>
+<p class="p1"><span class="Apple-converted-space">      </span>case 'food':<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>return 'border-teal-200/60 bg-teal-50/20 hover:bg-teal-100/30';</p>
+<p class="p1"><span class="Apple-converted-space">      </span>case 'traffic':<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>return 'border-amber-200/50 bg-amber-50/15 hover:bg-amber-100/25';</p>
+<p class="p1"><span class="Apple-converted-space">      </span>default:<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>return 'border-white/20 bg-white/10 hover:bg-white/20';</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">  </span>};</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>const getSpotIcon = (type) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>switch (type) {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>case 'highlight': return &lt;Sparkles className="w-4 h-4 text-emerald-500 animate-pulse" /&gt;;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>case 'food': return &lt;Utensils className="w-4 h-4 text-teal-600" /&gt;;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>case 'traffic': return &lt;Train className="w-4 h-4 text-amber-500" /&gt;;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>default: return &lt;MapPin className="w-4 h-4 text-emerald-400" /&gt;;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">  </span>};</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>// 一鍵導航點擊專用 (防止手風琴觸發開合)</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const handleMapRedirect = (e, url) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>e.stopPropagation();</p>
+<p class="p1"><span class="Apple-converted-space">    </span>if (url) {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>window.open(url, '_blank', 'noopener,noreferrer');</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">  </span>};</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>return (</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div className="min-h-screen text-slate-800 relative overflow-hidden font-sans font-light selection:bg-emerald-100 pb-12"&gt;</p>
+<p class="p2"><span class="Apple-converted-space">      </span></p>
+<p class="p1"><span class="Apple-converted-space">      </span>{/* 注入 iOS 通透流光、Apple 精緻標題字動態、以及背景 120% 巨幅大字跑馬燈 CSS */}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;style&gt;{`</p>
+<p class="p1"><span class="Apple-converted-space">        </span>/* 每個單字獨立的物理不規則漂游動畫 */</p>
+<p class="p1"><span class="Apple-converted-space">        </span>@keyframes letter-drift-T {</p>
+<p class="p1"><span class="Apple-converted-space">          </span>0%, 100% { transform: translate(0px, 0px) rotate(0deg) scale(1); }</p>
+<p class="p1"><span class="Apple-converted-space">          </span>25% { transform: translate(-22px, 15px) rotate(-4deg) scale(1.04); }</p>
+<p class="p1"><span class="Apple-converted-space">          </span>50% { transform: translate(-10px, -28px) rotate(3deg) scale(0.96); }</p>
+<p class="p1"><span class="Apple-converted-space">          </span>75% { transform: translate(18px, 12px) rotate(-2deg) scale(1.02); }</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>@keyframes letter-drift-O1 {</p>
+<p class="p1"><span class="Apple-converted-space">          </span>0%, 100% { transform: translate(0px, 0px) rotate(0deg) scale(1.08); }</p>
+<p class="p1"><span class="Apple-converted-space">          </span>30% { transform: translate(26px, -18px) rotate(5deg) scale(0.94); }</p>
+<p class="p1"><span class="Apple-converted-space">          </span>65% { transform: translate(-18px, 20px) rotate(-5deg) scale(1.05); }</p>
+<p class="p1"><span class="Apple-converted-space">          </span>85% { transform: translate(12px, -9px) rotate(2deg) scale(0.97); }</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>@keyframes letter-drift-K {</p>
+<p class="p1"><span class="Apple-converted-space">          </span>0%, 100% { transform: translate(0px, 0px) rotate(0deg) scale(0.96); }</p>
+<p class="p1"><span class="Apple-converted-space">          </span>20% { transform: translate(-16px, -24px) rotate(-6deg) scale(1.04); }</p>
+<p class="p1"><span class="Apple-converted-space">          </span>52% { transform: translate(20px, 14px) rotate(4deg) scale(0.93); }</p>
+<p class="p1"><span class="Apple-converted-space">          </span>78% { transform: translate(-18px, 8px) rotate(-3deg) scale(1.02); }</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>@keyframes letter-drift-Y {</p>
+<p class="p1"><span class="Apple-converted-space">          </span>0%, 100% { transform: translate(0px, 0px) rotate(0deg) scale(1.04); }</p>
+<p class="p1"><span class="Apple-converted-space">          </span>28% { transform: translate(26px, 22px) rotate(6deg) scale(0.94); }</p>
+<p class="p1"><span class="Apple-converted-space">          </span>58% { transform: translate(-20px, -14px) rotate(-5deg) scale(1.06); }</p>
+<p class="p1"><span class="Apple-converted-space">          </span>82% { transform: translate(8px, 16px) rotate(2deg) scale(0.96); }</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>@keyframes letter-drift-O2 {</p>
+<p class="p1"><span class="Apple-converted-space">          </span>0%, 100% { transform: translate(0px, 0px) rotate(0deg) scale(1.02); }</p>
+<p class="p1"><span class="Apple-converted-space">          </span>24% { transform: translate(-20px, 18px) rotate(-4deg) scale(1.03); }</p>
+<p class="p1"><span class="Apple-converted-space">          </span>45% { transform: translate(16px, -26px) rotate(5deg) scale(0.92); }</p>
+<p class="p1"><span class="Apple-converted-space">          </span>72% { transform: translate(-8px, -12px) rotate(-1deg) scale(1.05); }</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>/* 夏日大自然漸層流動動畫 */</p>
+<p class="p1"><span class="Apple-converted-space">        </span>@keyframes aurora-flow-1 {</p>
+<p class="p1"><span class="Apple-converted-space">          </span>0%, 100% { transform: translate(-10%, -10%) scale(1); }</p>
+<p class="p1"><span class="Apple-converted-space">          </span>50% { transform: translate(15%, 10%) scale(1.25); }</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>@keyframes aurora-flow-2 {</p>
+<p class="p1"><span class="Apple-converted-space">          </span>0%, 100% { transform: translate(10%, 15%) scale(1.2); }</p>
+<p class="p1"><span class="Apple-converted-space">          </span>50% { transform: translate(-15%, -10%) scale(0.85); }</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>@keyframes pulse-gentle {</p>
+<p class="p1"><span class="Apple-converted-space">          </span>0%, 100% { opacity: 0.25; }</p>
+<p class="p1"><span class="Apple-converted-space">          </span>50% { opacity: 0.55; }</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>/* 120% 高度的巨幅背景 TOKYO 跑馬燈動畫 */</p>
+<p class="p1"><span class="Apple-converted-space">        </span>@keyframes bg-marquee-infinite {</p>
+<p class="p1"><span class="Apple-converted-space">          </span>0% { transform: translateX(0%); }</p>
+<p class="p1"><span class="Apple-converted-space">          </span>100% { transform: translateX(-50%); }</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>/* Apple 官網級別的標題 Reveal 與呼吸擴展動態 */</p>
+<p class="p1"><span class="Apple-converted-space">        </span>@keyframes apple-title-reveal {</p>
+<p class="p1"><span class="Apple-converted-space">          </span>0% {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>opacity: 0;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>transform: translateY(24px) scale(0.98);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>letter-spacing: -0.05em;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>filter: blur(10px);</p>
+<p class="p1"><span class="Apple-converted-space">          </span>}</p>
+<p class="p1"><span class="Apple-converted-space">          </span>100% {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>opacity: 1;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>transform: translateY(0) scale(1);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>letter-spacing: -0.012em;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>filter: blur(0);</p>
+<p class="p1"><span class="Apple-converted-space">          </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>.animate-drift-T { animation: letter-drift-T 9s ease-in-out infinite; }</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.animate-drift-O1 { animation: letter-drift-O1 11s ease-in-out infinite; }</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.animate-drift-K { animation: letter-drift-K 10s ease-in-out infinite; }</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.animate-drift-Y { animation: letter-drift-Y 12s ease-in-out infinite; }</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.animate-drift-O2 { animation: letter-drift-O2 8s ease-in-out infinite; }</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>.bg-aurora-1 { animation: aurora-flow-1 20s ease-in-out infinite; }</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.bg-aurora-2 { animation: aurora-flow-2 24s ease-in-out infinite; }</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.animate-pulse-gentle { animation: pulse-gentle 6s ease-in-out infinite; }</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>/* 巨幅背景跑馬燈軌道樣式 */</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.bg-marquee-track {</p>
+<p class="p1"><span class="Apple-converted-space">          </span>display: flex;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>width: max-content;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>animation: bg-marquee-infinite 28s linear infinite;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>/* 標題流光質感 */</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.apple-title-fir-tokyo {</p>
+<p class="p1"><span class="Apple-converted-space">          </span>background: linear-gradient(135deg, #022c22 0%, #064e3b 60%, #0f766e 100%);</p>
+<p class="p1"><span class="Apple-converted-space">          </span>-webkit-background-clip: text;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>-webkit-text-fill-color: transparent;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>animation: apple-title-reveal 1.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>transition: letter-spacing 0.5s cubic-bezier(0.16, 1, 0.3, 1);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>.apple-title-fir-trends {</p>
+<p class="p1"><span class="Apple-converted-space">          </span>background: linear-gradient(135deg, #065f46 0%, #0d9488 70%, #14b8a6 100%);</p>
+<p class="p1"><span class="Apple-converted-space">          </span>-webkit-background-clip: text;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>-webkit-text-fill-color: transparent;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>animation: apple-title-reveal 1.8s cubic-bezier(0.16, 1, 0.3, 1) 0.15s forwards;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>transition: letter-spacing 0.5s cubic-bezier(0.16, 1, 0.3, 1);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>/* 融合 image_721624 苔蘚清晨光影的高級底盤 */</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.moss-premium-bg {</p>
+<p class="p1"><span class="Apple-converted-space">          </span>background-color: #f0f4f1; /* 清爽薄荷淺綠基底 */</p>
+<p class="p1"><span class="Apple-converted-space">          </span>background-image:<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>linear-gradient(180deg, rgba(230, 240, 232, 0.45) 0%, rgba(240, 245, 241, 0.95) 100%),<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>url('image_721624.png');</p>
+<p class="p1"><span class="Apple-converted-space">          </span>background-size: cover;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>background-position: center;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>background-attachment: fixed;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>background-blend-mode: overlay;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>/* 細黑體樣式優化 */</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.font-sans-light {</p>
+<p class="p1"><span class="Apple-converted-space">          </span>font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Segoe UI", "PingFang TC", sans-serif;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>font-weight: 300;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.font-sans-thin {</p>
+<p class="p1"><span class="Apple-converted-space">          </span>font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Segoe UI", "PingFang TC", sans-serif;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>font-weight: 200;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>.scrollbar-none::-webkit-scrollbar {</p>
+<p class="p1"><span class="Apple-converted-space">          </span>display: none;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.scrollbar-none {</p>
+<p class="p1"><span class="Apple-converted-space">          </span>-ms-overflow-style: none;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>scrollbar-width: none;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>.custom-cursor {</p>
+<p class="p1"><span class="Apple-converted-space">          </span>pointer-events: none;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1), height 0.4s cubic-bezier(0.16, 1, 0.3, 1);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>`}&lt;/style&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>{/* 夏日高質感綠色漸層底盤 */}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div className="absolute inset-0 moss-premium-bg z-0" /&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>{/* iOS 微光跟隨游標 (桌機版自動延遲流動) */}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>{cursorVisible &amp;&amp; (</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">          </span>className={`hidden md:block fixed z-50 rounded-full custom-cursor bg-emerald-400/20 blur-[10px] ${</p>
+<p class="p1"><span class="Apple-converted-space">            </span>isHovered ? 'w-24 h-24 -translate-x-12 -translate-y-12 bg-teal-400/30' : 'w-12 h-12 -translate-x-6 -translate-y-6'</p>
+<p class="p1"><span class="Apple-converted-space">          </span>}`}</p>
+<p class="p1"><span class="Apple-converted-space">          </span>style={{</p>
+<p class="p1"><span class="Apple-converted-space">            </span>left: `${trailPos.x}px`,</p>
+<p class="p1"><span class="Apple-converted-space">            </span>top: `${trailPos.y}px`,</p>
+<p class="p1"><span class="Apple-converted-space">          </span>}}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>/&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>)}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>{/* ================= 背景夏日不規則液態光暈 ================= */}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div className="absolute inset-0 overflow-hidden pointer-events-none z-0"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div className="absolute top-[10%] left-[-10%] w-[60vw] h-[60vw] rounded-full bg-emerald-300/35 filter blur-[100px] bg-aurora-1" /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div className="absolute bottom-[10%] right-[-10%] w-[65vw] h-[65vw] rounded-full bg-teal-200/30 filter blur-[120px] bg-aurora-2" /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>{/* ================= 白色 TOKYO 英文字母獨立不規則飄游動態（時尚英文粗黑體 + 加深綠色陰影 25%） ================= */}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div className="fixed inset-0 overflow-hidden pointer-events-none select-none z-0 flex items-center justify-center"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div className="text-white/[0.38] font-sans font-black text-[25vw] md:text-[21vw] tracking-tighter flex items-center justify-center gap-2 filter drop-shadow-[0_20px_35px_rgba(16,185,129,0.25)]"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;span className="inline-block animate-drift-T"&gt;T&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;span className="inline-block animate-drift-O1"&gt;O&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;span className="inline-block animate-drift-K"&gt;K&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;span className="inline-block animate-drift-Y"&gt;Y&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;span className="inline-block animate-drift-O2"&gt;O&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>{/* ================= 佔比高達 120% 高度的巨幅背景 TOKYO 跑馬燈（時尚英文粗黑體 + 加深綠色陰影 25%，若隱若現） ================= */}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div className="fixed top-1/2 left-0 w-full h-[120vh] -translate-y-1/2 overflow-hidden pointer-events-none select-none z-0 flex items-center justify-center"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div className="bg-marquee-track opacity-[0.35] text-white text-[90vh] font-sans font-black tracking-tighter uppercase flex items-center filter drop-shadow-[0_25px_35px_rgba(16,185,129,0.25)]"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;span className="inline-block px-8 animate-drift-T"&gt;TOKYO&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;span className="inline-block px-8 animate-drift-O1"&gt;TOKYO&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;span className="inline-block px-8 animate-drift-K"&gt;TOKYO&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;span className="inline-block px-8 animate-drift-Y"&gt;TOKYO&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>{/* 重複軌道以確保無縫循環 */}</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;span className="inline-block px-8 animate-drift-T"&gt;TOKYO&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;span className="inline-block px-8 animate-drift-O1"&gt;TOKYO&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;span className="inline-block px-8 animate-drift-K"&gt;TOKYO&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;span className="inline-block px-8 animate-drift-Y"&gt;TOKYO&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>{/* 主體網頁容器 */}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div className="max-w-3xl mx-auto px-4 py-8 relative z-10 font-sans-light"&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>{/* 極致清透毛玻璃主視窗面板（高度穿透背景大字與跑馬燈） */}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">          </span>className="bg-white/20 backdrop-blur-md border border-white/55 rounded-[36px] shadow-[0_30px_90px_rgba(20,50,30,0.06)] overflow-hidden transition-all duration-300 relative text-emerald-950"</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&gt;</p>
+<p class="p2"><span class="Apple-converted-space">          </span></p>
+<p class="p1"><span class="Apple-converted-space">          </span>{/* iOS 簡潔白光頂層導航條 */}</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div className="flex items-center justify-between px-8 py-5 border-b border-white/20 bg-white/10"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div className="flex gap-2"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;span className="w-3 h-3 rounded-full bg-[#f4a261]/20 border border-[#f4a261]/40" /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;span className="w-3 h-3 rounded-full bg-[#e9c46a]/20 border border-[#e9c46a]/40" /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;span className="w-3 h-3 rounded-full bg-[#2a9d8f]/20 border border-[#2a9d8f]/40" /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div className="flex items-center gap-4 text-emerald-900/50"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;Sun className="w-4 h-4 hover:text-emerald-850 transition-colors cursor-pointer" /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;Minus className="w-4 h-4 hover:text-emerald-850 transition-colors cursor-pointer" /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;Menu className="w-4 h-4 hover:text-emerald-850 transition-colors cursor-pointer" /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">          </span>{/* 頂部不對稱巨幅呼吸感細黑體大標題 */}</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div className="px-8 md:px-14 pt-14 pb-12 border-b border-white/20 group"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div className="flex items-center gap-2 text-[10px] text-emerald-700 tracking-[0.3em] font-bold uppercase mb-3"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;Compass className="w-4 h-4 animate-spin-slow text-emerald-500" /&gt; TOKYO.INDIE.CURATED</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p2"><span class="Apple-converted-space">            </span></p>
+<p class="p1"><span class="Apple-converted-space">            </span>{/* iOS 精緻細字遮罩 reveal 效果 + Apple 風格呼吸微動效 */}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div className="overflow-hidden"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;h1 className="text-6xl md:text-[5.5rem] font-sans-thin tracking-tighter leading-none uppercase apple-title-fir-tokyo group-hover:tracking-normal"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>TOKYO</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;/h1&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div className="overflow-hidden mt-2"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;h2 className="text-5xl md:text-7xl font-sans-thin tracking-tighter leading-none uppercase apple-title-fir-trends group-hover:tracking-wide"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>TRENDS '26</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;/h2&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div className="flex items-end justify-between mt-10 border-t border-white/20 pt-5"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;p className="text-emerald-900/80 text-xs font-medium tracking-tight max-w-xs leading-relaxed"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>東京 6 天 5 夜最終完整版行程表</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;div className="text-right"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;span className="text-3xl font-sans-thin tracking-tighter text-emerald-950 block"&gt;2026&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;span className="text-[10px] tracking-widest text-emerald-600 font-bold block"&gt;06.04 – 06.09&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">          </span>{/* 內頁內容 */}</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div className="p-8 md:p-14 space-y-12"&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>{/* 基本資訊區塊 Grid */}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div className="grid grid-cols-1 md:grid-cols-2 gap-6"&gt;</p>
+<p class="p2"><span class="Apple-converted-space">              </span></p>
+<p class="p1"><span class="Apple-converted-space">              </span>{/* 航班卡片 */}</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;LocalTiltCard<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">                </span>className="bg-white/30 border border-white/45 rounded-3xl p-6 backdrop-blur-sm cursor-default shadow-sm text-emerald-950 flex flex-col justify-between"</p>
+<p class="p1"><span class="Apple-converted-space">                </span>onMouseEnter={() =&gt; setIsHovered(true)}</p>
+<p class="p1"><span class="Apple-converted-space">                </span>onMouseLeave={() =&gt; setIsHovered(false)}</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                  </span>&lt;div className="flex items-center justify-between border-b border-white/20 pb-3.5 mb-4"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div className="flex items-center gap-2.5"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                      </span>&lt;Plane className="w-4 h-4 text-emerald-500" /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                      </span>&lt;h3 className="text-xs font-bold tracking-[0.15em] text-emerald-900 uppercase"&gt;航班資訊&lt;/h3&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>{/* 機場 Google Map 導航 Icon */}</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;button<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">                      </span>onClick={(e) =&gt; handleMapRedirect(e, tripInfo.flights.departure.mapUrl)}</p>
+<p class="p1"><span class="Apple-converted-space">                      </span>className="p-1.5 rounded-full bg-white/40 hover:bg-emerald-100/60 border border-white/50 text-emerald-700 hover:scale-105 active:scale-95 transition-all duration-300"</p>
+<p class="p1"><span class="Apple-converted-space">                      </span>title="Google Maps 機場定位"</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                      </span>&lt;Compass className="w-3.5 h-3.5" /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                  </span>&lt;/div&gt;</p>
+<p class="p2"><span class="Apple-converted-space">                  </span></p>
+<p class="p1"><span class="Apple-converted-space">                  </span>&lt;div className="space-y-4 text-xs font-sans-light"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div className="relative pl-3 border-l-2 border-emerald-400"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                      </span>&lt;span className="text-[9px] text-emerald-500 font-bold tracking-wider block mb-1"&gt;去程 | {tripInfo.flights.departure.date}&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                      </span>&lt;p className="text-sm font-bold text-emerald-950"&gt;{tripInfo.flights.departure.code}&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                      </span>&lt;p className="text-emerald-800 mt-1"&gt;{tripInfo.flights.departure.time}&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                      </span>&lt;span className="text-[9px] bg-emerald-100/60 text-emerald-900 font-bold px-2 py-0.5 rounded-full mt-2 inline-block"&gt;飛行：{tripInfo.flights.departure.duration}&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
+<p class="p2"><span class="Apple-converted-space">                    </span></p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div className="relative pl-3 border-l-2 border-emerald-300"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                      </span>&lt;span className="text-[9px] text-teal-600 font-bold tracking-wider block mb-1"&gt;回程 | {tripInfo.flights.return.date}&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                      </span>&lt;p className="text-sm font-bold text-emerald-950"&gt;{tripInfo.flights.return.code}&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                      </span>&lt;p className="text-emerald-800 mt-1"&gt;{tripInfo.flights.return.time}&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                  </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;/LocalTiltCard&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">              </span>{/* 住宿卡片 */}</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;LocalTiltCard<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">                </span>className="bg-white/30 border border-white/45 rounded-3xl p-6 backdrop-blur-sm cursor-default shadow-sm text-emerald-950 flex flex-col justify-between"</p>
+<p class="p1"><span class="Apple-converted-space">                </span>onMouseEnter={() =&gt; setIsHovered(true)}</p>
+<p class="p1"><span class="Apple-converted-space">                </span>onMouseLeave={() =&gt; setIsHovered(false)}</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                  </span>&lt;div className="flex items-center justify-between border-b border-white/20 pb-3.5 mb-4"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div className="flex items-center gap-2.5"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                      </span>&lt;Hotel className="w-4 h-4 text-emerald-500" /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                      </span>&lt;h3 className="text-xs font-bold tracking-[0.15em] text-emerald-900 uppercase"&gt;住宿資訊&lt;/h3&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>{/* 飯店 Google Map 導航 Icon */}</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;button<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">                      </span>onClick={(e) =&gt; handleMapRedirect(e, tripInfo.hotel.mapUrl)}</p>
+<p class="p1"><span class="Apple-converted-space">                      </span>className="p-1.5 rounded-full bg-white/40 hover:bg-emerald-100/60 border border-white/50 text-emerald-700 hover:scale-105 active:scale-95 transition-all duration-300"</p>
+<p class="p1"><span class="Apple-converted-space">                      </span>title="Google Maps 飯店定位"</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                      </span>&lt;Compass className="w-3.5 h-3.5" /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                  </span>&lt;/div&gt;</p>
+<p class="p2"><span class="Apple-converted-space">                  </span></p>
+<p class="p1"><span class="Apple-converted-space">                  </span>&lt;div className="text-xs font-sans-light"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;p className="text-sm font-bold text-emerald-950 flex items-center justify-between"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                      </span>{tripInfo.hotel.name}</p>
+<p class="p1"><span class="Apple-converted-space">                      </span>&lt;span className="text-[9px] font-bold bg-white/40 text-emerald-800 px-2 py-0.5 rounded-full border border-white/10"&gt;SHIBUYA&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div className="grid grid-cols-2 gap-3 my-3.5 text-[10px] bg-white/20 p-3 rounded-2xl border border-white/10"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                      </span>&lt;div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;span className="text-emerald-600 block mb-0.5 font-bold"&gt;CI_CHECKIN&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;span className="font-bold text-emerald-900"&gt;{tripInfo.hotel.checkIn.split(' ')[1]}&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                      </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                      </span>&lt;div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;span className="text-emerald-600 block mb-0.5 font-bold"&gt;CO_CHECKOUT&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;span className="font-bold text-emerald-900"&gt;{tripInfo.hotel.checkOut.split(' ')[1]}&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                      </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;ul className="space-y-1.5 text-emerald-850/80 text-[11px] leading-relaxed"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                      </span>{tripInfo.hotel.advantages.map((adv, i) =&gt; (</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;li key={i} className="flex items-start gap-1.5"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                          </span>&lt;span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-1.5 shrink-0" /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                          </span>&lt;span&gt;{adv}&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;/li&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                      </span>))}</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/ul&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                  </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;/LocalTiltCard&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>{/* 核心交通提醒 (通透大圓角卡片) */}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div className="bg-white/25 border border-white/45 rounded-3xl p-6 shadow-sm hover:shadow-md transition-all duration-500 flex items-start justify-between"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;div className="flex items-start gap-4"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;div className="p-3 bg-white/30 rounded-2xl border border-white/40 mt-1 shadow-sm"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                  </span>&lt;Train className="w-5 h-5 text-emerald-500 animate-pulse" /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;div className="space-y-1 font-sans-light"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                  </span>&lt;h3 className="text-xs font-bold text-emerald-600 tracking-wider uppercase"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>//成田機場 ↔ 澀谷 · 精選</p>
+<p class="p1"><span class="Apple-converted-space">                  </span>&lt;/h3&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                  </span>&lt;p className="text-sm font-bold text-emerald-950"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>推薦交通：{tripInfo.traffic.recommend}</p>
+<p class="p1"><span class="Apple-converted-space">                  </span>&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                  </span>&lt;p className="text-xs text-emerald-900/80 leading-relaxed"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;strong&gt;原因：&lt;/strong&gt;{tripInfo.traffic.reason}。去程與回程皆建議搭乘。</p>
+<p class="p1"><span class="Apple-converted-space">                  </span>&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>{/* 交通定位 Google Map (定位澀谷站) */}</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;button<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">                </span>onClick={(e) =&gt; handleMapRedirect(e, tripInfo.traffic.mapUrl)}</p>
+<p class="p1"><span class="Apple-converted-space">                </span>className="p-2 rounded-full bg-white/40 hover:bg-emerald-100/60 border border-white/50 text-emerald-700 hover:scale-105 active:scale-95 transition-all duration-300 ml-4 shrink-0 mt-2"</p>
+<p class="p1"><span class="Apple-converted-space">                </span>title="Google Maps 定位澀谷站"</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;Compass className="w-4 h-4" /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>{/* 亮點快速總覽 (iOS 霧面塊) */}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div className="bg-white/15 border border-white/30 rounded-3xl p-6"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;h3 className="text-[10px] font-bold text-emerald-800 mb-4 tracking-wider uppercase flex items-center gap-1.5"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>✦ 經典行程重點</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;/h3&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;div className="grid grid-cols-2 sm:grid-cols-3 gap-3"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>{highlights.map((h, idx) =&gt; (</p>
+<p class="p1"><span class="Apple-converted-space">                  </span>&lt;div<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">                    </span>key={idx}<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">                    </span>className="bg-white/45 border border-white/40 p-3 rounded-2xl flex flex-col justify-between hover:border-emerald-300/40 transition-all duration-300 hover:shadow-md shadow-sm transform hover:-translate-y-0.5 relative group/highlight"</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>onMouseEnter={() =&gt; setIsHovered(true)}</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>onMouseLeave={() =&gt; setIsHovered(false)}</p>
+<p class="p1"><span class="Apple-converted-space">                  </span>&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div className="flex justify-between items-start gap-1"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                      </span>&lt;span className="text-[9px] text-emerald-600 font-bold tracking-wider"&gt;{h.type}&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                      </span>{/* 極小化外部地圖導航 Icon */}</p>
+<p class="p1"><span class="Apple-converted-space">                      </span>&lt;button<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">                        </span>onClick={(e) =&gt; handleMapRedirect(e, h.mapUrl)}</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>className="p-1 rounded-full bg-white/50 hover:bg-emerald-100/80 border border-white/30 text-emerald-700 scale-90 opacity-40 group-hover/highlight:opacity-100 transition-all"</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>title="Google Maps 定位"</p>
+<p class="p1"><span class="Apple-converted-space">                      </span>&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;ExternalLink className="w-2.5 h-2.5" /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                      </span>&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;span className="text-xs font-bold text-emerald-950 mt-1.5"&gt;{h.spot}&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                  </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>))}</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>{/* 每日詳細行程互動區 */}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div className="space-y-6"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;div className="flex items-center justify-between border-b border-white/15 pb-4"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;h2 className="text-xs font-bold tracking-widest text-emerald-950 uppercase flex items-center gap-2"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                  </span>&lt;Calendar className="w-4 h-4 text-emerald-500" /&gt;<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">                  </span>行程日程安排</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/h2&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;span className="text-[9px] font-bold text-emerald-600/60"&gt;CHOOSE DAY //&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">              </span>{/* 橫向天數選單 (極簡 iOS 行動滑動鈕) */}</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none border-b border-white/10"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>{days.map((d, idx) =&gt; (</p>
+<p class="p1"><span class="Apple-converted-space">                  </span>&lt;button</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>key={idx}</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>onClick={() =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                      </span>setActiveDay(idx);</p>
+<p class="p1"><span class="Apple-converted-space">                      </span>setExpandedSpot(null);</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>}}</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>onMouseEnter={() =&gt; setIsHovered(true)}</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>onMouseLeave={() =&gt; setIsHovered(false)}</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>className={`flex-none px-4 py-3.5 transition-all duration-300 flex flex-col items-center min-w-[76px] relative overflow-hidden rounded-2xl border ${</p>
+<p class="p1"><span class="Apple-converted-space">                      </span>activeDay === idx</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>? 'bg-emerald-500 text-white border-emerald-400 font-bold scale-105 shadow-md shadow-emerald-500/10'</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>: 'bg-white/20 text-emerald-800/60 border-white/10 hover:text-emerald-950 hover:bg-white/45'</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>}`}</p>
+<p class="p1"><span class="Apple-converted-space">                  </span>&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;span className="text-[8px] font-bold tracking-widest block mb-0.5"&gt;DAY 0{idx + 1}&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;span className="text-sm block"&gt;{d.date}&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                  </span>&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>))}</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">              </span>{/* 單日行程卡片 (磨砂白面板) */}</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;div className="bg-white/40 border border-white/50 rounded-[28px] p-6 shadow-sm relative overflow-hidden transition-all duration-500"&gt;</p>
+<p class="p2"><span class="Apple-converted-space">                </span></p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-8 border-b border-white/20 pb-5"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                  </span>&lt;div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;span className="text-[9px] text-emerald-500 font-bold tracking-wider uppercase block"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                      </span>{days[activeDay].day} / {days[activeDay].date} //主題</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;h3 className="text-lg font-bold text-emerald-950 mt-1 font-sans"&gt;{days[activeDay].theme}&lt;/h3&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                  </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                  </span>&lt;span className="text-[9px] font-bold bg-emerald-500 text-white px-3.5 py-1.5 rounded-full font-mono"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>{days[activeDay].spots.length}_SPOTS</p>
+<p class="p1"><span class="Apple-converted-space">                  </span>&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>{/* 時間軸 */}</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;div className="relative border-l-2 border-white/40 ml-2 pl-6 space-y-6"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                  </span>{days[activeDay].spots.map((spot, idx) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>const isExpanded = expandedSpot === idx;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>return (</p>
+<p class="p1"><span class="Apple-converted-space">                      </span>&lt;div key={idx} className="relative"&gt;</p>
+<p class="p2"><span class="Apple-converted-space">                        </span></p>
+<p class="p1"><span class="Apple-converted-space">                        </span>{/* 時間軸圓點 */}</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;div className="absolute -left-[31px] top-2.5 w-2.5 h-2.5 bg-emerald-400 rounded-full border-2 border-white" /&gt;</p>
+<p class="p2"><span class="Apple-converted-space">                        </span></p>
+<p class="p1"><span class="Apple-converted-space">                        </span>{/* 景點主體 */}</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;div<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">                          </span>onClick={() =&gt; setExpandedSpot(isExpanded ? null : idx)}</p>
+<p class="p1"><span class="Apple-converted-space">                          </span>onMouseEnter={() =&gt; setIsHovered(true)}</p>
+<p class="p1"><span class="Apple-converted-space">                          </span>onMouseLeave={() =&gt; setIsHovered(false)}</p>
+<p class="p1"><span class="Apple-converted-space">                          </span>className={`cursor-pointer border rounded-3xl p-4.5 transition-all duration-500 hover:-translate-y-0.5 hover:shadow-sm ${getSpotStyle(spot.type)}`}</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                          </span>&lt;div className="flex items-start justify-between gap-3"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;div className="space-y-1.5"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                              </span>&lt;span className="inline-flex items-center gap-1.5 text-[9px] text-emerald-800 font-bold bg-white/40 px-2.5 py-0.5 rounded-full"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>&lt;Clock className="w-3 h-3" /&gt; {spot.time}</p>
+<p class="p1"><span class="Apple-converted-space">                              </span>&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                              </span>&lt;h4 className="text-sm font-bold text-emerald-950 flex items-center gap-2 mt-1"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>{getSpotIcon(spot.type)}</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>{spot.title}</p>
+<p class="p1"><span class="Apple-converted-space">                              </span>&lt;/h4&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;/div&gt;</p>
+<p class="p2"><span class="Apple-converted-space">                            </span></p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;div className="flex items-center gap-2.5"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                              </span>{/* 點擊導航 Icon：一鍵跳轉對應景點的 Google Map 地圖定位 */}</p>
+<p class="p1"><span class="Apple-converted-space">                              </span>{spot.mapUrl &amp;&amp; (</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>&lt;button<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">                                  </span>onClick={(e) =&gt; handleMapRedirect(e, spot.mapUrl)}</p>
+<p class="p1"><span class="Apple-converted-space">                                  </span>className="p-1.5 rounded-full bg-white/50 hover:bg-emerald-100/80 border border-white/30 text-emerald-700 hover:scale-105 transition-all duration-300 shadow-sm"</p>
+<p class="p1"><span class="Apple-converted-space">                                  </span>title="Google Maps 定位導航"</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                  </span>&lt;Compass className="w-3.5 h-3.5" /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                              </span>)}</p>
+<p class="p1"><span class="Apple-converted-space">                              </span>&lt;ChevronDown className={`w-4 h-4 transition-transform duration-500 ease-out ${isExpanded ? 'rotate-180 text-emerald-800' : ''}`} /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                          </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                          </span>{/* 摺疊詳細內容 */}</p>
+<p class="p1"><span class="Apple-converted-space">                          </span>&lt;div className={`transition-all duration-500 ease-in-out overflow-hidden ${</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>isExpanded ? 'max-h-[500px] opacity-100 mt-4' : 'max-h-0 opacity-0 mt-0 pointer-events-none'</p>
+<p class="p1"><span class="Apple-converted-space">                          </span>}`}&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;p className="text-xs text-slate-800 leading-relaxed bg-white/50 p-3.5 rounded-2xl border border-white/30"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                              </span>{spot.desc}</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;/p&gt;</p>
+<p class="p2"><span class="Apple-converted-space">                            </span></p>
+<p class="p1"><span class="Apple-converted-space">                            </span>{spot.info &amp;&amp; (</p>
+<p class="p1"><span class="Apple-converted-space">                              </span>&lt;div className="flex items-center gap-2 text-xs text-slate-700 bg-white/30 px-3.5 py-2.5 rounded-2xl border border-white/20 mt-2"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>&lt;Info className="w-3.5 h-3.5 text-emerald-600 shrink-0" /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>&lt;span&gt;{spot.info}&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                              </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>)}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                            </span>{spot.warning &amp;&amp; (</p>
+<p class="p1"><span class="Apple-converted-space">                              </span>&lt;div className="flex items-start gap-2.5 text-xs text-amber-900 bg-amber-500/10 p-3.5 rounded-2xl border border-amber-500/20 mt-2"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>&lt;AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>&lt;span&gt;{spot.warning}&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                              </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>)}</p>
+<p class="p1"><span class="Apple-converted-space">                          </span>&lt;/div&gt;</p>
+<p class="p2"><span class="Apple-converted-space">                          </span></p>
+<p class="p1"><span class="Apple-converted-space">                          </span>{!isExpanded &amp;&amp; (</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;p className="text-xs text-slate-650 line-clamp-1 mt-2"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                              </span>{spot.desc}</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                          </span>)}</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                      </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>);</p>
+<p class="p1"><span class="Apple-converted-space">                  </span>})}</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>{/* 備選美食特別卡片 */}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;LocalTiltCard<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">              </span>className="border border-white/45 bg-white/20 rounded-3xl p-6 cursor-default shadow-sm text-emerald-950 flex flex-col justify-between"</p>
+<p class="p1"><span class="Apple-converted-space">              </span>onMouseEnter={() =&gt; setIsHovered(true)}</p>
+<p class="p1"><span class="Apple-converted-space">              </span>onMouseLeave={() =&gt; setIsHovered(false)}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;div className="flex items-center justify-between border-b border-white/20 pb-3.5 mb-4"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                  </span>&lt;div className="flex items-center gap-2"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;Heart className="w-4 h-4 text-emerald-500 animate-pulse" /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;h3 className="text-xs font-bold tracking-wider text-white"&gt;// 備選清單 (有空再吃)&lt;/h3&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                  </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                  </span>{/* 備選壽喜燒 Google Map 定位 Icon */}</p>
+<p class="p1"><span class="Apple-converted-space">                  </span>&lt;button<span class="Apple-converted-space"> </span></p>
+<p class="p1"><span class="Apple-converted-space">                    </span>onClick={(e) =&gt; handleMapRedirect(e, backupFood.mapUrl)}</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>className="p-1.5 rounded-full bg-white/40 hover:bg-emerald-100/60 border border-white/50 text-emerald-700 hover:scale-105 active:scale-95 transition-all duration-300"</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>title="Google Maps 壽喜燒定位"</p>
+<p class="p1"><span class="Apple-converted-space">                  </span>&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;Compass className="w-3.5 h-3.5" /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                  </span>&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;div className="space-y-3"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                  </span>&lt;p className="text-sm font-bold text-emerald-950"&gt;{backupFood.title}&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                  </span>&lt;div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs mt-2"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div className="bg-white/30 p-3.5 rounded-2xl border border-white/30 hover:border-emerald-300 transition-colors"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                      </span>&lt;span className="text-emerald-700 font-bold block mb-1"&gt;👍 優點&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                      </span>&lt;span className="text-slate-800"&gt;{backupFood.pros}&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div className="bg-white/30 p-3.5 rounded-2xl border border-white/30 hover:border-amber-300 transition-colors"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                      </span>&lt;span className="text-amber-700 font-bold block mb-1"&gt;⚠️ 缺點&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                      </span>&lt;span className="text-slate-800"&gt;{backupFood.cons}&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                  </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                  </span>&lt;p className="text-[10px] text-emerald-600/70 italic mt-1.5"&gt;目前保留定位：{backupFood.status}&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/LocalTiltCard&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">          </span>{/* 視窗底部控制列 */}</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div className="flex items-center justify-between px-8 py-5 border-t border-white/20 bg-white/10 text-[10px] text-emerald-700/60"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div className="flex items-center gap-1"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;ArrowLeft className="w-3.5 h-3.5" /&gt; &lt;span&gt;6 DAYS 5 NIGHTS&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;span className="font-bold"&gt;CURATED BY EMERALD CHROME ✦ 2026&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div className="flex items-center gap-1"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;span&gt;SYSTEM.ONLINE&lt;/span&gt; &lt;ArrowRight className="w-3.5 h-3.5" /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>{/* 頁尾 */}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div className="text-center text-[10px] text-emerald-700/50 pt-8 tracking-widest uppercase"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;p&gt;-- SUMMER TRIP SPECIAL PLANNING · PREMIUM TOURING SYSTEM --&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>);</p>
+<p class="p1">}</p>
+</body>
+</html>
