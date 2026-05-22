@@ -3,258 +3,205 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="theme-color" content="#F4F5F1" />
 <title>Tokyo Early Summer</title>
 <style>
 :root{
-  --bg:#F4F5F1;
-  --text:#111111;
-  --muted:#5F665E;
-  --glass:rgba(255,255,255,.64);
-  --border:rgba(17,17,17,.09);
-  --green:#B7C9B0;
-  --sage:#DDE6D8;
-  --mint:#D7F3E3;
-  --lime:#DDFE72;
-  --warning:#FFF3B8;
-  --shadow:0 10px 30px rgba(0,0,0,.06);
-  --ease:cubic-bezier(.22,1,.36,1);
+  --bg:#F4F5F1;--text:#111;--muted:#5F665E;--glass:rgba(255,255,255,.66);--border:rgba(17,17,17,.09);
+  --green:#B7C9B0;--mint:#D7F3E3;--lime:#DDFE72;--warning:#FFF3B8;--ok:#DDFE72;--closed:#ECEDE7;
+  --shadow:0 10px 30px rgba(0,0,0,.06);--ease:cubic-bezier(.22,1,.36,1);
 }
-*{box-sizing:border-box}
-html{scroll-behavior:smooth;background:var(--bg)}
-body{
-  margin:0;
-  color:var(--text);
-  font-family:Inter,"Helvetica Neue",Arial,sans-serif;
-  background:linear-gradient(180deg,#F8F8F3 0%,#F4F5F1 55%,#EEF2EA 100%);
-  overflow-x:hidden;
-  letter-spacing:-.01em;
-}
-body:before{
-  content:"";
-  position:fixed;
-  inset:0;
-  pointer-events:none;
-  background:
-    radial-gradient(circle at 20% 10%,rgba(221,254,114,.12),transparent 28%),
-    radial-gradient(circle at 82% 14%,rgba(207,239,243,.18),transparent 32%);
-  z-index:0;
-}
-.liquid-bg{
-  position:fixed;
-  inset:-12vh -10vw;
-  pointer-events:none;
-  z-index:0;
-  overflow:hidden;
-  filter:blur(18px) saturate(1.25);
-  opacity:.86;
-}
-.liquid-shape{
-  position:absolute;
-  width:58vw;
-  height:54vh;
-  min-width:520px;
-  min-height:420px;
-  border-radius:56% 44% 62% 38% / 42% 58% 46% 54%;
-  background:
-    radial-gradient(circle at 28% 28%, rgba(255,255,255,.72), transparent 28%),
-    radial-gradient(circle at 72% 62%, rgba(221,254,114,.95), transparent 46%),
-    linear-gradient(135deg, rgba(189,255,58,.95), rgba(215,243,227,.42));
-  mix-blend-mode:multiply;
-  transform-origin:center;
-  animation:liquidMorph 18s var(--ease) infinite alternate;
-}
-.liquid-a{left:-18vw;top:-10vh;animation-delay:-2s}
-.liquid-b{right:-16vw;top:16vh;width:64vw;height:58vh;animation-name:liquidMorphB;animation-duration:22s;animation-delay:-8s}
-.liquid-c{left:28vw;bottom:-26vh;width:52vw;height:48vh;opacity:.78;animation-duration:25s;animation-delay:-14s}
-@keyframes liquidMorph{
-  0%{transform:translate3d(0,0,0) rotate(-8deg) scale(1);border-radius:58% 42% 66% 34% / 38% 62% 44% 56%}
-  45%{transform:translate3d(8vw,7vh,0) rotate(8deg) scale(1.08);border-radius:42% 58% 38% 62% / 62% 38% 58% 42%}
-  100%{transform:translate3d(2vw,-4vh,0) rotate(-2deg) scale(.96);border-radius:64% 36% 48% 52% / 52% 48% 36% 64%}
-}
-@keyframes liquidMorphB{
-  0%{transform:translate3d(0,0,0) rotate(10deg) scale(1.05);border-radius:44% 56% 38% 62% / 58% 42% 60% 40%}
-  50%{transform:translate3d(-10vw,-4vh,0) rotate(-6deg) scale(.98);border-radius:65% 35% 58% 42% / 38% 62% 44% 56%}
-  100%{transform:translate3d(-3vw,8vh,0) rotate(4deg) scale(1.12);border-radius:36% 64% 52% 48% / 64% 36% 48% 52%}
-}
-.ring-bg{
-  position:fixed;
-  width:min(112vmin,980px);
-  aspect-ratio:1;
-  left:50%;
-  top:50%;
-  transform:translate(-50%,-50%);
-  z-index:1;
-  opacity:.68;
-  color:rgba(255,255,255,.9);
-  animation:rotateTokyo 56s linear infinite;
-  pointer-events:none;
-  filter:drop-shadow(0 0 28px rgba(255,255,255,.28));
-}
-.ring-bg svg{width:100%;height:100%;overflow:visible}
-.ring-bg text{font-size:74px;font-weight:700;letter-spacing:.02em;fill:currentColor}
-@keyframes rotateTokyo{from{transform:translate(-50%,-50%) rotate(0deg)}to{transform:translate(-50%,-50%) rotate(360deg)}}
-.page{position:relative;z-index:2}
-.hero{
-  min-height:100svh;
-  padding:96px 6vw 72px;
-  display:grid;
-  grid-template-columns:1.05fr .65fr;
-  gap:6vw;
-  align-items:center;
-}
-.eyebrow{
-  display:inline-flex;
-  align-items:center;
-  gap:10px;
-  margin-bottom:20px;
-  color:var(--muted);
-  font-size:11px;
-  letter-spacing:.14em;
-  text-transform:uppercase;
-}
-.eyebrow:before{content:"";width:7px;height:7px;border-radius:50%;background:var(--lime);box-shadow:0 0 18px rgba(221,254,114,.9)}
-h1{margin:0;font-size:clamp(52px,8vw,112px);font-weight:500;line-height:.92;letter-spacing:-.06em;animation:titleIntro 1.15s var(--ease) both,titleBreath 6s ease-in-out 1.15s infinite alternate}
-h1 span{display:block;opacity:0;transform:translateY(24px);filter:blur(10px);animation:wordIn .9s var(--ease) forwards}
-h1 span:nth-child(2){animation-delay:.16s}h1 span:nth-child(3){animation-delay:.32s}
-@keyframes titleIntro{from{opacity:.4}to{opacity:1}}
-@keyframes wordIn{to{opacity:1;transform:translateY(0);filter:blur(0)}}
-@keyframes titleBreath{from{opacity:.94;letter-spacing:-.064em;transform:translateY(0)}to{opacity:1;letter-spacing:-.052em;transform:translateY(-4px)}}
-.hero-copy{position:relative;z-index:3}.hero-sub{max-width:340px;margin:18px 0 0;color:var(--muted);font-size:12px;line-height:1.55}
-.dashboard,.info-card,.day-card,.day-summary,.alert-card{margin-top:14px;padding:14px;border-radius:18px;background:rgba(255,243,184,.68)}
-.dashboard{position:relative;z-index:3;padding:26px;border-radius:34px}.dashboard-top{display:flex;justify-content:space-between;gap:18px;padding-bottom:20px;border-bottom:1px solid rgba(17,17,17,.08)}
-.small-label{margin-bottom:6px;color:var(--muted);font-size:10px;letter-spacing:.12em;text-transform:uppercase}.dash-title{font-size:24px;font-weight:500;letter-spacing:-.04em;line-height:1.15}.dash-date{color:var(--muted);font-size:14px;line-height:1.6;text-align:right}
-.status-list{display:grid;gap:12px;margin-top:20px}.status-item{display:grid;grid-template-columns:68px 1fr;gap:12px;align-items:center;padding:14px;border-radius:22px;background:rgba(255,255,255,.42);border:1px solid rgba(17,17,17,.06)}.status-item strong{display:block;font-size:16px;font-weight:500;line-height:1.3}.status-item span{color:var(--muted);font-size:12px;line-height:1.5}
-.progress{height:8px;margin-top:20px;border-radius:99px;background:rgba(17,17,17,.06);overflow:hidden}.progress i{display:block;width:0;height:100%;background:linear-gradient(90deg,var(--green),var(--lime));transition:width .7s var(--ease)}
-.quick-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}.action-btn{border:1px solid rgba(17,17,17,.08);background:rgba(255,255,255,.52);border-radius:999px;padding:10px 14px;color:var(--text);font-size:12px;text-decoration:none}
-section{padding:48px 6vw;position:relative;z-index:2}.section-head{display:flex;justify-content:space-between;align-items:end;gap:32px;margin-bottom:20px}h2{margin:0;font-size:clamp(24px,3.4vw,44px);font-weight:500;line-height:1;letter-spacing:-.04em}.section-note{display:none}
-.info-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.info-card{min-height:auto;padding:14px;border-radius:20px;display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:start}.info-card h3,.day-card h3{margin:0;font-size:16px;font-weight:500;line-height:1.3}.info-card p,.day-card p,.day-summary p{margin:14px 0 0;color:var(--muted);font-size:14px;line-height:1.55}.day-card p{flex:1}.info-card p{margin:6px 0 0;font-size:12px;line-height:1.45}.info-icon{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:rgba(221,254,114,.48);font-size:15px;line-height:1}
-.day-nav-wrap{position:sticky;top:0;z-index:9;padding:16px 0;margin:-16px 0 24px;background:linear-gradient(180deg,rgba(244,245,241,.92),rgba(244,245,241,.68),transparent);backdrop-filter:blur(18px)}.day-nav-line{display:flex;align-items:center;gap:12px}.day-nav{display:flex;gap:12px;overflow-x:auto;scrollbar-width:none;flex:1}.day-nav::-webkit-scrollbar,.days-track::-webkit-scrollbar{display:none}
-.day-tab{flex:0 0 auto;border:1px solid var(--border);border-radius:999px;background:rgba(255,255,255,.46);padding:12px 18px;color:var(--muted);font-size:12px;letter-spacing:.16em;cursor:pointer;transition:.35s var(--ease)}.day-tab.active{color:var(--text);background:rgba(221,254,114,.62)}
-.arrow-btn{width:42px;height:42px;border:1px solid var(--border);background:rgba(255,255,255,.58);border-radius:50%;cursor:pointer;color:var(--text);font-size:18px;transition:.35s var(--ease)}.arrow-btn:hover{transform:translateY(-2px);background:rgba(221,254,114,.45)}.swipe-hint{margin:10px 4px 0;color:var(--muted);font-size:12px;letter-spacing:.04em}
-.days-track{display:flex;gap:24px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-behavior:smooth;padding-bottom:12px;align-items:flex-start}.day-panel{flex:0 0 min(920px,88vw);scroll-snap-align:center;display:grid;grid-template-columns:minmax(220px,.34fr) 1fr;gap:24px;align-items:start}
-.day-summary{position:sticky;top:96px;align-self:start;min-height:0!important;height:auto!important;padding:24px;border-radius:28px;background:linear-gradient(160deg,rgba(255,255,255,.64),rgba(221,230,216,.52))}.day-no{color:var(--muted);font-size:12px;letter-spacing:.16em;text-transform:uppercase}.day-summary h3{margin:18px 0 0;font-size:clamp(28px,4vw,46px);line-height:.98;letter-spacing:-.05em;font-weight:500}
-.alert-card{margin-top:16px;padding:14px;border-radius:18px;background:rgba(255,243,184,.68)}
-.mobile-day-dock{display:none}.alert-card strong{display:block;font-size:14px;margin-bottom:8px}.alert-card span{color:#6A633D;font-size:13px;line-height:1.6}
-.cards{display:grid;gap:12px;align-content:start;align-self:start}.day-card{position:relative;display:flex;flex-direction:column;justify-content:flex-start;min-height:168px;padding:18px 68px 18px 18px;border-radius:26px;transition:.45s var(--ease);overflow:hidden}.day-card:hover{transform:translateY(-4px);background:rgba(255,255,255,.72)}.card-row{display:flex;justify-content:space-between;gap:14px;align-items:flex-start}.time{flex:0 0 auto;padding:8px 12px;border-radius:999px;background:rgba(215,243,227,.7);font-size:12px;white-space:nowrap}.tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:auto;padding-top:14px}.tag{border:1px solid rgba(17,17,17,.07);background:rgba(255,255,255,.42);border-radius:999px;padding:8px 10px;color:var(--muted);font-size:11px}.tag.warning{background:rgba(255,243,184,.72);color:#6A633D}
-.map-link{position:absolute;top:16px;right:16px;width:38px;height:38px;display:flex;align-items:center;justify-content:center;border-radius:50%;background:rgba(255,255,255,.72);border:1px solid rgba(17,17,17,.08);color:var(--text);text-decoration:none;transition:.35s var(--ease);backdrop-filter:blur(12px)}.map-link svg{width:16px;height:16px}.map-link:hover{transform:translateY(-2px) scale(1.04);background:rgba(221,254,114,.52)}.map-link:focus-visible,.action-btn:focus-visible,.day-tab:focus-visible,.arrow-btn:focus-visible{outline:2px solid rgba(17,17,17,.35);outline-offset:3px}
-.reveal{opacity:0;filter:blur(12px);transform:translateY(24px);transition:.9s var(--ease)}.reveal.visible{opacity:1;filter:blur(0);transform:translateY(0)}footer{padding:52px 24px 36px;text-align:center;color:rgba(17,17,17,.45);font-size:12px;letter-spacing:.08em}
-@media(max-width:900px){.liquid-bg{inset:-8vh -28vw;filter:blur(20px) saturate(1.18);opacity:.78}.liquid-shape{min-width:360px;min-height:320px;width:88vw;height:42vh}.liquid-a{left:-44vw;top:-4vh}.liquid-b{right:-52vw;top:20vh}.liquid-c{left:12vw;bottom:-20vh}.hero{grid-template-columns:1fr;padding:72px 24px 44px;gap:34px}.ring-bg{width:118vmin;opacity:.58}.ring-bg text{font-size:62px}.dashboard{padding:22px;border-radius:30px}.dash-title{font-size:22px}section{padding:42px 24px}.section-head{display:block}.info-grid{grid-template-columns:repeat(2,1fr);gap:10px}.info-card{padding:12px;grid-template-columns:1fr}.info-icon{width:28px;height:28px}.day-panel{grid-template-columns:1fr;flex-basis:88vw;gap:14px}.day-summary{position:relative;top:auto;min-height:0!important;height:auto!important}.day-card{min-height:auto}.arrow-btn{display:none}.day-card{padding:15px 58px 15px 15px}.card-row{gap:8px}.time{font-size:10px;padding:6px 9px}.map-link{top:14px;right:14px;width:36px;height:36px}.status-item{grid-template-columns:64px 1fr}
-  .mobile-day-dock{position:fixed;left:14px;right:14px;bottom:14px;z-index:20;display:flex;gap:8px;padding:10px;border-radius:999px;background:rgba(255,255,255,.72);border:1px solid rgba(17,17,17,.09);backdrop-filter:blur(22px) saturate(1.05);box-shadow:0 12px 34px rgba(0,0,0,.08);overflow-x:auto;scrollbar-width:none}
-  .mobile-day-dock::-webkit-scrollbar{display:none}
-  .mobile-day-btn{flex:1 0 auto;min-width:48px;height:38px;border:0;border-radius:999px;background:transparent;color:var(--muted);font-size:12px;letter-spacing:.06em;cursor:pointer}
-  .mobile-day-btn.active{background:rgba(221,254,114,.7);color:var(--text)}
-  footer{padding-bottom:92px}
-}
+*{box-sizing:border-box} html{scroll-behavior:smooth;background:var(--bg)}
+body{margin:0;color:var(--text);font-family:Inter,"Helvetica Neue",Arial,sans-serif;background:linear-gradient(180deg,#F8F8F3 0%,#F4F5F1 55%,#EEF2EA 100%);overflow-x:hidden;letter-spacing:-.01em}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;background:radial-gradient(circle at 20% 10%,rgba(221,254,114,.12),transparent 28%),radial-gradient(circle at 82% 14%,rgba(207,239,243,.18),transparent 32%);z-index:0}
+.liquid-bg{position:fixed;inset:-12vh -10vw;pointer-events:none;z-index:0;overflow:hidden;filter:blur(18px) saturate(1.25);opacity:.82}
+.liquid-shape{position:absolute;width:58vw;height:54vh;min-width:520px;min-height:420px;border-radius:56% 44% 62% 38% / 42% 58% 46% 54%;background:radial-gradient(circle at 28% 28%,rgba(255,255,255,.72),transparent 28%),radial-gradient(circle at 72% 62%,rgba(221,254,114,.95),transparent 46%),linear-gradient(135deg,rgba(189,255,58,.95),rgba(215,243,227,.42));mix-blend-mode:multiply;transform-origin:center;animation:liquidMorph 18s var(--ease) infinite alternate}
+.liquid-a{left:-18vw;top:-10vh;animation-delay:-2s}.liquid-b{right:-16vw;top:16vh;width:64vw;height:58vh;animation-name:liquidMorphB;animation-duration:22s;animation-delay:-8s}.liquid-c{left:28vw;bottom:-26vh;width:52vw;height:48vh;opacity:.72;animation-duration:25s;animation-delay:-14s}
+@keyframes liquidMorph{0%{transform:translate3d(0,0,0) rotate(-8deg) scale(1);border-radius:58% 42% 66% 34%/38% 62% 44% 56%}45%{transform:translate3d(8vw,7vh,0) rotate(8deg) scale(1.08);border-radius:42% 58% 38% 62%/62% 38% 58% 42%}100%{transform:translate3d(2vw,-4vh,0) rotate(-2deg) scale(.96);border-radius:64% 36% 48% 52%/52% 48% 36% 64%}}
+@keyframes liquidMorphB{0%{transform:translate3d(0,0,0) rotate(10deg) scale(1.05);border-radius:44% 56% 38% 62%/58% 42% 60% 40%}50%{transform:translate3d(-10vw,-4vh,0) rotate(-6deg) scale(.98);border-radius:65% 35% 58% 42%/38% 62% 44% 56%}100%{transform:translate3d(-3vw,8vh,0) rotate(4deg) scale(1.12);border-radius:36% 64% 52% 48%/64% 36% 48% 52%}}
+.ring-bg{position:fixed;width:min(112vmin,980px);aspect-ratio:1;left:50%;top:50%;transform:translate(-50%,-50%);z-index:1;opacity:.66;color:rgba(255,255,255,.9);animation:rotateTokyo 56s linear infinite;pointer-events:none;filter:drop-shadow(0 0 28px rgba(255,255,255,.28))}.ring-bg svg{width:100%;height:100%;overflow:visible}.ring-bg text{font-size:74px;font-weight:700;letter-spacing:.02em;fill:currentColor}@keyframes rotateTokyo{from{transform:translate(-50%,-50%) rotate(0)}to{transform:translate(-50%,-50%) rotate(360deg)}}
+.page{position:relative;z-index:2}.hero{min-height:100svh;padding:96px 6vw 60px;display:grid;grid-template-columns:1fr .74fr;gap:5vw;align-items:center}
+h1{margin:0;font-size:clamp(52px,8vw,112px);font-weight:500;line-height:.92;letter-spacing:-.06em;animation:titleBreath 6s ease-in-out 1s infinite alternate}h1 span{display:block;opacity:0;transform:translateY(24px);filter:blur(10px);animation:wordIn .9s var(--ease) forwards}h1 span:nth-child(2){animation-delay:.16s}h1 span:nth-child(3){animation-delay:.32s}@keyframes wordIn{to{opacity:1;transform:translateY(0);filter:blur(0)}}@keyframes titleBreath{from{letter-spacing:-.064em;transform:translateY(0)}to{letter-spacing:-.052em;transform:translateY(-4px)}}
+.hero-copy,.dashboard{position:relative;z-index:3}.hero-sub{max-width:340px;margin:18px 0 0;color:var(--muted);font-size:12px;line-height:1.55}
+.dashboard,.info-card,.day-card,.day-summary,.alert-card,.tool-panel{border:1px solid var(--border);background:var(--glass);backdrop-filter:blur(28px) saturate(1.05);box-shadow:var(--shadow)}.dashboard{padding:24px;border-radius:34px}.dashboard-top{display:flex;justify-content:space-between;gap:18px;padding-bottom:18px;border-bottom:1px solid rgba(17,17,17,.08)}.small-label{margin-bottom:6px;color:var(--muted);font-size:10px;letter-spacing:.12em;text-transform:uppercase}.dash-title{font-size:24px;font-weight:500;letter-spacing:-.04em;line-height:1.15}.dash-date{color:var(--muted);font-size:13px;line-height:1.5;text-align:right}.status-list{display:grid;gap:10px;margin-top:18px}.status-item{display:grid;grid-template-columns:62px 1fr;gap:12px;align-items:center;padding:13px;border-radius:20px;background:rgba(255,255,255,.42);border:1px solid rgba(17,17,17,.06)}.status-item strong{display:block;font-size:15px;font-weight:500;line-height:1.3}.status-item span{color:var(--muted);font-size:12px;line-height:1.5}.progress{height:7px;margin-top:18px;border-radius:99px;background:rgba(17,17,17,.06);overflow:hidden}.progress i{display:block;width:0;height:100%;background:linear-gradient(90deg,var(--green),var(--lime));transition:width .7s var(--ease)}
+.quick-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}.action-btn,.mode-btn{border:1px solid rgba(17,17,17,.08);background:rgba(255,255,255,.56);border-radius:999px;padding:9px 12px;color:var(--text);font-size:12px;text-decoration:none;cursor:pointer}.mode-btn.active{background:rgba(221,254,114,.62)}
+section{padding:44px 6vw;position:relative;z-index:2}.section-head{display:flex;justify-content:space-between;align-items:end;gap:32px;margin-bottom:18px}h2{margin:0;font-size:clamp(24px,3.4vw,44px);font-weight:500;line-height:1;letter-spacing:-.04em}.info-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.info-card{padding:13px;border-radius:18px;display:grid;grid-template-columns:auto 1fr;gap:9px;align-items:start}.info-icon{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:rgba(221,254,114,.48);font-size:14px}.info-card h3,.day-card h3{margin:0;font-size:15px;font-weight:500;line-height:1.3}.day-card h3 .en,.dash-title .en,.status-item strong .en{font-size:.78em;color:#7E857C;font-weight:400;letter-spacing:0}.info-card p,.day-card p,.day-summary p{color:var(--muted);font-size:12px;line-height:1.5}.info-card p{margin:5px 0 0}
+.tool-panel{display:grid;grid-template-columns:1fr auto;gap:14px;align-items:center;padding:14px;border-radius:22px;margin-bottom:16px}.tool-title{font-size:15px;font-weight:500}.tool-copy{color:var(--muted);font-size:12px;line-height:1.45}.tool-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.day-nav-wrap{position:sticky;top:0;z-index:9;padding:14px 0;margin:-14px 0 20px;background:linear-gradient(180deg,rgba(244,245,241,.92),rgba(244,245,241,.68),transparent);backdrop-filter:blur(18px)}.day-nav-line{display:flex;align-items:center;gap:10px}.day-nav{display:flex;gap:10px;overflow-x:auto;scrollbar-width:none;flex:1}.day-nav::-webkit-scrollbar,.days-track::-webkit-scrollbar{display:none}.day-tab{flex:0 0 auto;border:1px solid var(--border);border-radius:999px;background:rgba(255,255,255,.5);padding:10px 15px;color:var(--muted);font-size:11px;letter-spacing:.12em;cursor:pointer}.day-tab.active{color:var(--text);background:rgba(221,254,114,.62)}.arrow-btn{width:38px;height:38px;border:1px solid var(--border);background:rgba(255,255,255,.58);border-radius:50%;cursor:pointer;color:var(--text);font-size:18px}.swipe-hint{margin:8px 4px 0;color:var(--muted);font-size:11px}
+.days-track{display:flex;gap:24px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-behavior:smooth;padding-bottom:12px;align-items:flex-start}.day-panel{flex:0 0 min(920px,88vw);scroll-snap-align:center;display:grid;grid-template-columns:1fr;gap:18px;align-items:start}.day-summary{position:relative;top:auto;align-self:start;min-height:0;height:auto;padding:0 4px 6px;border:0!important;background:transparent!important;backdrop-filter:none!important;box-shadow:none!important}.day-no{color:var(--muted);font-size:11px;letter-spacing:.14em;text-transform:uppercase}.day-summary h3{margin:12px 0 0;font-size:clamp(32px,4.2vw,62px);line-height:.92;letter-spacing:-.06em;font-weight:500}.day-summary p{margin:12px 0 0;max-width:620px}.alert-card{margin-top:14px;padding:12px 14px;border-radius:999px;background:rgba(255,243,184,.72);display:inline-flex;gap:10px;align-items:center;max-width:min(100%,760px)}.alert-card strong{display:inline-block;font-size:12px;margin:0;white-space:nowrap}.alert-card span{color:#6A633D;font-size:12px;line-height:1.45}.cards{display:grid;gap:11px;align-content:start}.day-card{position:relative;display:flex;flex-direction:column;min-height:154px;padding:15px 58px 15px 15px;border-radius:24px;transition:.35s var(--ease);overflow:hidden}.day-card.done{opacity:.48}.day-card.done h3{text-decoration:line-through}.card-row{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;padding-right:52px}.time{flex:0 0 auto;padding:6px 9px;border-radius:999px;background:rgba(215,243,227,.72);font-size:10px;white-space:nowrap}.tags{display:flex;flex-wrap:wrap;gap:7px;margin-top:auto;padding-top:12px}.tag{border:1px solid rgba(17,17,17,.07);background:rgba(255,255,255,.42);border-radius:999px;padding:6px 8px;color:var(--muted);font-size:10px}.tag.warning{background:rgba(255,243,184,.72);color:#6A633D}.tag.status-open{background:rgba(221,254,114,.55);color:var(--text)}.tag.status-warn{background:rgba(255,243,184,.72);color:#6A633D}.tag.status-closed{background:rgba(236,237,231,.72);color:var(--muted)}.card-actions{position:absolute;top:14px;right:14px;display:flex;gap:6px;z-index:3}.icon-btn,.map-link{width:34px;height:34px;display:flex;align-items:center;justify-content:center;border-radius:50%;background:rgba(255,255,255,.72);border:1px solid rgba(17,17,17,.08);color:var(--text);text-decoration:none;cursor:pointer;backdrop-filter:blur(12px)}.icon-btn svg,.map-link svg{width:15px;height:15px}
+.mobile-day-dock{display:none}.hidden-by-rain{display:none!important}.nearby-list{display:none;margin-top:16px}.nearby-list.show{display:grid;gap:8px}.nearby-item{display:flex;justify-content:space-between;align-items:center;padding:11px 13px;border-radius:16px;background:rgba(255,255,255,.52);border:1px solid rgba(17,17,17,.07);font-size:12px}.nearby-item span{color:var(--muted)}.reveal{opacity:0;filter:blur(12px);transform:translateY(24px);transition:.8s var(--ease)}.reveal.visible{opacity:1;filter:blur(0);transform:translateY(0)}footer{padding:52px 24px 36px;text-align:center;color:rgba(17,17,17,.45);font-size:12px;letter-spacing:.08em}
+@media(max-width:900px){.card-row{display:block;padding-right:48px}.time{display:inline-flex;margin-top:8px}.card-actions{top:12px;right:12px}.icon-btn,.map-link{width:32px;height:32px}.liquid-bg{inset:-8vh -28vw;filter:blur(20px) saturate(1.18);opacity:.72}.liquid-shape{min-width:360px;min-height:320px;width:88vw;height:42vh}.liquid-a{left:-44vw;top:-4vh}.liquid-b{right:-52vw;top:20vh}.liquid-c{left:12vw;bottom:-20vh}.hero{grid-template-columns:1fr;padding:72px 24px 44px;gap:34px}.ring-bg{width:118vmin;opacity:.54}.ring-bg text{font-size:62px}.dashboard{padding:21px;border-radius:28px}.dash-title{font-size:22px}section{padding:38px 24px}.section-head{display:block}.info-grid{grid-template-columns:repeat(2,1fr);gap:10px}.info-card{padding:12px;grid-template-columns:1fr}.tool-panel{grid-template-columns:1fr}.tool-actions{justify-content:flex-start}.day-panel{grid-template-columns:1fr;flex-basis:88vw;gap:14px}.day-summary{position:relative;top:auto;padding:0 2px 4px}.day-summary h3{font-size:clamp(32px,12vw,54px)}.alert-card{border-radius:18px;display:block}.arrow-btn{display:none}.status-item{grid-template-columns:58px 1fr}.day-card{min-height:auto;padding:15px 56px 15px 15px}.mobile-day-dock{position:fixed;left:14px;right:14px;bottom:14px;z-index:20;display:flex;gap:8px;padding:10px;border-radius:999px;background:rgba(255,255,255,.74);border:1px solid rgba(17,17,17,.09);backdrop-filter:blur(22px) saturate(1.05);box-shadow:0 12px 34px rgba(0,0,0,.08);overflow-x:auto;scrollbar-width:none}.mobile-day-dock::-webkit-scrollbar{display:none}.mobile-day-btn{flex:1 0 auto;min-width:48px;height:38px;border:0;border-radius:999px;background:transparent;color:var(--muted);font-size:12px;letter-spacing:.06em;cursor:pointer}.mobile-day-btn.active{background:rgba(221,254,114,.7);color:var(--text)}footer{padding-bottom:92px}}
 </style>
 </head>
 <body>
 <div class="liquid-bg" aria-hidden="true"><div class="liquid-shape liquid-a"></div><div class="liquid-shape liquid-b"></div><div class="liquid-shape liquid-c"></div></div>
 <div class="ring-bg" aria-hidden="true"><svg viewBox="0 0 320 320"><defs><path id="tokyoCircle" d="M160,160 m-118,0 a118,118 0 1,1 236,0 a118,118 0 1,1 -236,0"/></defs><text><textPath href="#tokyoCircle" startOffset="0%">TOKYO TOKYO TOKYO TOKYO TOKYO TOKYO TOKYO</textPath></text></svg></div>
-
 <main class="page">
 <header class="hero">
-  <div class="hero-copy reveal"><h1><span>TOKYO</span><span>EARLY</span><span>SUMMER</span></h1><p class="hero-sub">快速查看今日行程、下一站與導航。</p></div>
+  <div class="hero-copy reveal"><h1><span>TOKYO</span><span>EARLY</span><span>SUMMER</span></h1><p class="hero-sub">快速查看今日行程、下一站、營業提醒與導航。</p></div>
   <aside class="dashboard reveal" aria-label="Today Dashboard">
     <div class="dashboard-top"><div><div class="small-label">今日重點</div><div class="dash-title" id="dashTitle">澀谷暖身日</div></div><div class="dash-date" id="dashDate">第 1 天<br>6/4（四）</div></div>
     <div class="status-list"><div class="status-item"><div class="small-label">現在</div><div><strong id="dashNow">抵達澀谷</strong><span id="dashNowNote">先寄放行李，讓身體適應節奏。</span></div></div><div class="status-item"><div class="small-label">下一站</div><div><strong id="dashNext">MIYASHITA PARK</strong><span id="dashNextNote">澀谷周邊輕鬆逛，不排太滿。</span></div></div><div class="status-item"><div class="small-label">之後</div><div><strong id="dashLater">18:00 Jikasei MENSHO</strong><span id="dashLaterNote">推薦鴨白湯拉麵。</span></div></div></div>
-    <div class="progress"><i id="dashProgress"></i></div><div class="quick-actions"><a class="action-btn" id="dashMap" href="https://maps.google.com/?q=Shibuya+Station" target="_blank">今日第一站導航</a><a class="action-btn" href="#itinerary">查看完整行程</a></div>
+    <div class="progress"><i id="dashProgress"></i></div><div class="quick-actions"><a class="action-btn" id="dashMap" href="https://maps.google.com/?q=Shibuya+Station" target="_blank" rel="noopener">今日第一站導航</a><a class="action-btn" href="#itinerary">查看行程</a></div>
   </aside>
 </header>
-
-<section class="overview reveal">
-  <div class="section-head"><div><div class="eyebrow">TRIP INFO</div><h2>基本資訊</h2></div></div>
-  <div class="info-grid">
-    <article class="info-card"><div class="info-icon">⌂</div><div><div class="small-label">住宿</div><h3>BookTeaBed Shibuya</h3><p>6/4 15:00 後｜6/9 10:00 前</p></div></article>
-    <article class="info-card"><div class="info-icon">↗</div><div><div class="small-label">去程</div><h3>TR866</h3><p>6/4 06:45 TPE → 11:15 NRT</p></div></article>
-    <article class="info-card"><div class="info-icon">↙</div><div><div class="small-label">回程</div><h3>TR867</h3><p>6/9 21:15 NRT → 23:55 TPE</p></div></article>
-    <article class="info-card"><div class="info-icon">⇄</div><div><div class="small-label">交通</div><h3>成田 ↔ 澀谷</h3><p>Narita Express（N’EX）</p></div></article>
-  </div>
-</section>
-
-<section class="itinerary reveal" id="itinerary">
-  <div class="section-head"><div><div class="eyebrow">ITINERARY</div><h2>每日行程</h2></div></div>
-  <div class="day-nav-wrap"><div class="day-nav-line"><button class="arrow-btn" id="prevDay" aria-label="上一天">‹</button><nav class="day-nav" aria-label="Day Navigation" id="dayNav"></nav><button class="arrow-btn" id="nextDay" aria-label="下一天">›</button></div><div class="swipe-hint">← 左右滑動查看每日行程 →</div></div>
-  <div class="days-track" id="daysTrack"></div>
-</section>
-
-<div class="mobile-day-dock" id="mobileDayDock" aria-label="手機版天數切換"></div>
-<footer>made by jc_bowei</footer>
-</main>
-
+<section class="overview reveal"><div class="section-head"><div><div class="small-label">TRIP INFO</div><h2>基本資訊</h2></div></div><div class="info-grid"><article class="info-card"><div class="info-icon">⌂</div><div><div class="small-label">住宿</div><h3>BookTeaBed Shibuya</h3><p>6/4 15:00 後｜6/9 10:00 前</p></div></article><article class="info-card"><div class="info-icon">↗</div><div><div class="small-label">去程</div><h3>TR866</h3><p>6/4 06:45 TPE → 11:15 NRT</p></div></article><article class="info-card"><div class="info-icon">↙</div><div><div class="small-label">回程</div><h3>TR867</h3><p>6/9 21:15 NRT → 23:55 TPE</p></div></article><article class="info-card"><div class="info-icon">⇄</div><div><div class="small-label">交通</div><h3>成田 ↔ 澀谷</h3><p>Narita Express（N’EX）</p></div></article></div></section>
+<section class="itinerary reveal" id="itinerary"><div class="section-head"><div><div class="small-label">ITINERARY</div><h2>每日行程</h2></div></div><div class="tool-panel"><div><div class="tool-title" id="toolTitle">旅行工具</div><div class="tool-copy">營業狀態為靜態估算，出發前請點地圖確認最新資訊。</div></div><div class="tool-actions"><button class="mode-btn" id="rainBtn">雨天模式</button><button class="mode-btn" id="nearbyBtn">附近可去</button></div><div class="nearby-list" id="nearbyList"></div></div><div class="day-nav-wrap"><div class="day-nav-line"><button class="arrow-btn" id="prevDay" aria-label="上一天">‹</button><nav class="day-nav" aria-label="Day Navigation" id="dayNav"></nav><button class="arrow-btn" id="nextDay" aria-label="下一天">›</button></div><div class="swipe-hint">← 左右滑動查看每日行程 →</div></div><div class="days-track" id="daysTrack"></div></section>
+<div class="mobile-day-dock" id="mobileDayDock" aria-label="手機版天數切換"></div><footer>made by jc_bowei</footer></main>
 <script>
 const mapIcon='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-6-5.2-6-11a6 6 0 1112 0c0 5.8-6 11-6 11z"/><circle cx="12" cy="10" r="2.5"/></svg>';
+const checkIcon='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>';
 const tripData=[
-  {day:'第 1 天',date:'6/4（四）',title:'澀谷暖身日',heading:'澀谷<br>暖身日',summary:'抵達東京的第一天，行程集中在澀谷周邊。這天不排太滿。',alert:'很早班機，加上成田進東京耗體力；晚上下北澤可跳過，累了直接回飯店。',now:'抵達澀谷',nowNote:'約 14:00–15:00 抵達／寄放行李。',next:'MIYASHITA PARK',nextNote:'澀谷周邊輕鬆逛，不排太滿。',later:'18:00 Jikasei MENSHO',laterNote:'推薦鴨白湯拉麵。',map:'https://maps.google.com/?q=Shibuya+Station',items:[
-    ['14:00–15:00','抵達澀谷／寄放行李','成田抵達後前往澀谷，先寄放行李。','https://maps.google.com/?q=Shibuya+Station',['澀谷','N’EX']],
-    ['下午','MIYASHITA PARK / Shibuya PARCO','澀谷周邊輕鬆逛街，這天不排太滿。','https://maps.google.com/?q=MIYASHITA+PARK+Tokyo',['逛街','可調整']],
-    ['18:00','Jikasei MENSHO','晚餐｜拉麵。推薦鴨白湯拉麵。','https://maps.google.com/?q=Jikasei+MENSHO+Shibuya',['晚餐','拉麵']],
-    ['有體力再去','下北澤','推薦古著、咖啡店、小酒吧。如果累直接回飯店。','https://maps.google.com/?q=Shimokitazawa+Tokyo',['可跳過']]
-  ]},
-  {day:'第 2 天',date:'6/5（五）',title:'美術館・Harakado・Shibuya Sky',heading:'美術館<br>澀谷天空',summary:'10:00–11:00 起床整理，11:00 出門。美術館、Harakado、日枝神社，最後銜接澀谷天空。',alert:'Shibuya Sky 已預約 18:20；17:30 左右回澀谷休息／便利商店補水。晚上澀谷附近自由吃，不建議再跑遠。',now:'The National Art Center',nowNote:'12:00 左右，美術館不像神社需要太早。',next:'14:30 Harakado',nextNote:'Rooftop、food hall、選物店。',later:'18:20 Shibuya Sky',laterNote:'已預約，可看黃昏、藍調時刻與夜景。',map:'https://maps.google.com/?q=The+National+Art+Center+Tokyo',items:[
-    ['10:00–11:00','起床整理','11:00 出門。','https://maps.google.com/?q=BookTeaBed+Shibuya',['準備']],
-    ['12:00 左右','The National Art Center, Tokyo','這時間剛好；美術館不像神社需要太早。','https://maps.google.com/?q=The+National+Art+Center+Tokyo',['美術館']],
-    ['14:30 左右','Harakado','推薦 rooftop、food hall、選物店。','https://maps.google.com/?q=Harakado+Tokyo',['rooftop','food hall']],
-    ['16:30 左右','Hie Shrine','不需要待太久，主要看山王祭氛圍與初夏神社感。','https://maps.google.com/?q=Hie+Shrine+Tokyo',['神社']],
-    ['17:30 左右','回澀谷休息／補水','便利商店補水，準備 Shibuya Sky。','https://maps.google.com/?q=Shibuya+Station',['休息']],
-    ['18:20','Shibuya Sky','已預約。東京 6 月日落約 18:50 左右，可看到黃昏、藍調時刻與夜景。','https://maps.google.com/?q=Shibuya+Sky',['已預約']]
-  ]},
-  {day:'第 3 天',date:'6/6（六）',title:'鎌倉・湘南單軌日',heading:'鎌倉<br>湘南單軌',summary:'09:00 起床，10:00 出門。澀谷搭 JR 湘南新宿線到北鎌倉，下午搭湘南單軌到江之島。',alert:'這天是唯一需要比較早的。紫陽花季人潮多，已經是晚起極限版本。',now:'澀谷 → 北鎌倉',nowNote:'10:00 出門，搭 JR 湘南新宿線。',next:'約 11:10 明月院',nextNote:'紫陽花季人潮會多，但這是合理折衷。',later:'15:00 湘南單軌',laterNote:'傍晚江之島／湘南海邊散步，晚餐附近自由吃。',map:'https://maps.google.com/?q=Meigetsuin+Kamakura',items:[
-    ['09:00','起床','這天是唯一需要比較早的。','https://maps.google.com/?q=BookTeaBed+Shibuya',['早起']],
-    ['10:00','澀谷 → 北鎌倉','從澀谷搭 JR 湘南新宿線前往北鎌倉站。','https://maps.google.com/?q=Kita-Kamakura+Station',['JR 湘南新宿線']],
-    ['約 11:10','明月院','這時間一定會有人，但以不想太早起來說已經是合理折衷。','https://maps.google.com/?q=Meigetsuin+Kamakura',['紫陽花']],
-    ['13:00 左右','鎌倉站附近午餐','鎌倉站附近自由午餐。','https://maps.google.com/?q=Kamakura+Station',['午餐']],
-    ['15:00 左右','大船站 → 湘南江之島','搭湘南單軌電車前往湘南江之島。傍晚海邊散步，晚餐在湘南海邊附近自由吃，晚上回澀谷。','https://maps.google.com/?q=Shonan-Enoshima+Station',['湘南單軌','海邊']]
-  ]},
-  {day:'第 4 天',date:'6/7（日）',title:'文京紫陽花祭・月島',heading:'文京<br>紫陽花祭',summary:'10:00 起床，11:00 出門。文京紫陽花祭與月島文字燒，晚上回澀谷休息。',alert:'祭典到 16:00；12:00 日本箏曲表演，13:00–14:00 開幕式。已刪除高圓寺，梅雨季＋祭典日不需要排太滿。',now:'文京紫陽花祭',nowNote:'12:00 左右抵達 Hakusan Shrine。',next:'14:00 離開',nextNote:'15:00 月島文字燒，時間剛好。',later:'回澀谷休息',laterNote:'晚上不再加排高圓寺。',map:'https://maps.google.com/?q=Hakusan+Shrine+Tokyo',items:[
-    ['10:00','起床','這天可以正常晚起，祭典到 16:00。','https://maps.google.com/?q=BookTeaBed+Shibuya',['晚起']],
-    ['11:00','出門','前往文京紫陽花祭。','https://maps.google.com/?q=Hakusan+Shrine+Tokyo',['出門']],
-    ['12:00 左右','文京紫陽花祭｜Hakusan Shrine','剛好可碰到 12:00 日本箏曲表演，以及 13:00–14:00 開幕式。','https://maps.google.com/?q=Hakusan+Shrine+Tokyo',['祭典','紫陽花']],
-    ['14:00 左右','離開祭典','保留移動與轉換節奏。','https://maps.google.com/?q=Hakusan+Shrine+Tokyo',['移動']],
-    ['15:00 左右','月島文字燒｜Tsukishima Monja Moheji Flagship','這時間很剛好，可以避開午餐人潮與晚餐人潮。晚上回澀谷休息。','https://maps.google.com/?q=Tsukishima+Monja+Moheji+Flagship',['文字燒']]
-  ]},
-  {day:'第 5 天',date:'6/8（一）',title:'秋葉原・丸之內・根室花丸',heading:'秋葉原<br>丸之內',summary:'10:00–11:00 起床，11:00 出門。秋葉原、丸之內、根室花丸。',alert:'15:30–16:00 先去抽根室花丸號碼牌，再接著丸之內散步。',now:'秋葉原',nowNote:'12:00–15:00，推薦 retro game、模型、電器、轉蛋。',next:'根室花丸號碼牌',nextNote:'15:30–16:00 先去抽號碼牌。',later:'丸之內散步',laterNote:'東京站夜景、KITTE、丸之內街景。晚餐根室花丸。',map:'https://maps.google.com/?q=Akihabara+Tokyo',items:[
-    ['10:00–11:00','起床整理','11:00 出門。','https://maps.google.com/?q=BookTeaBed+Shibuya',['準備']],
-    ['12:00–15:00','秋葉原','推薦 retro game、模型、電器、轉蛋。','https://maps.google.com/?q=Akihabara+Tokyo',['retro game','轉蛋']],
-    ['15:30–16:00','先去抽根室花丸號碼牌','先抽號碼牌，再接著丸之內散步。','https://maps.google.com/?q=Nemuro+Hanamaru+KITTE+Marunouchi',['號碼牌']],
-    ['接著','丸之內散步','推薦東京站夜景、KITTE、丸之內街景。','https://maps.google.com/?q=KITTE+Marunouchi',['KITTE','東京站']],
-    ['晚餐','根室花丸','依現場叫號時間用餐。','https://maps.google.com/?q=Nemuro+Hanamaru+KITTE+Marunouchi',['晚餐']]
-  ]},
-  {day:'第 6 天',date:'6/9（二）',title:'吉祥寺・回程',heading:'吉祥寺<br>回程日',summary:'10:00 起床，11:00 出門。吉祥寺、井之頭公園，下午回澀谷拿行李，17:30 前往成田。',alert:'10:00 前退房。16:00 左右回澀谷拿行李，17:30 前往成田機場。',now:'吉祥寺 / 井之頭公園',nowNote:'12:00 左右，散步、咖啡、初夏綠意。',next:'14:00–15:00 吉祥寺午餐',nextNote:'吉祥寺附近自由午餐。',later:'17:30 前往成田',laterNote:'回程 21:15 成田 T1 起飛。',map:'https://maps.google.com/?q=Inokashira+Park',items:[
-    ['10:00','起床','退房日，10:00 前退房。','https://maps.google.com/?q=BookTeaBed+Shibuya',['退房']],
-    ['11:00','出門','前往吉祥寺。','https://maps.google.com/?q=Kichijoji+Tokyo',['出門']],
-    ['12:00 左右','吉祥寺 / 井之頭公園','推薦散步、咖啡、初夏綠意。','https://maps.google.com/?q=Inokashira+Park',['公園','咖啡']],
-    ['14:00–15:00','吉祥寺附近午餐','吉祥寺附近自由午餐。','https://maps.google.com/?q=Kichijoji+Tokyo',['午餐']],
-    ['16:00 左右','回澀谷拿行李','預留時間避免回程壓力。','https://maps.google.com/?q=BookTeaBed+Shibuya',['行李']],
-    ['17:30','前往成田機場','回程 Scoot TR867，21:15 成田 T1 起飛。','https://maps.google.com/?q=Narita+Airport+Terminal+1',['NRT T1']]
-  ]}
-];
-function render(){
+{day:'第 1 天',date:'6/4（四）',title:'澀谷暖身日',heading:'澀谷<br>暖身日',summary:'抵達東京、成田入境，搭 N’EX 到澀谷。下午澀谷周邊、咖啡休息，晚上拉麵。',alert:'早班機＋成田進東京耗體力，晚上下北澤與宵夜都可視體力調整。',now:'抵達東京 / 成田入境',nowNote:'搭 N’EX 到澀谷，先到飯店寄放行李。',next:'宮下公園 <span class="en">MIYASHITA PARK</span> / 澀谷 PARCO <span class="en">Shibuya PARCO</span>',nextNote:'澀谷街區輕鬆逛，再去 ABOUT LIFE COFFEE BREWERS 休息。',later:'自家製 MENSHO <span class="en">Jikasei MENSHO</span>',laterNote:'晚餐推薦鴨白湯拉麵、創作系拉麵。',map:'https://maps.google.com/?q=Narita+Airport+Terminal+1',items:[
+['抵達後','抵達東京 / 成田入境','成田入境後，搭 Narita Express（N’EX）前往澀谷。','https://maps.google.com/?q=Narita+Airport+Terminal+1',['成田','N’EX'],true,'any',35.7720,140.3929],
+['抵達澀谷後','飯店寄放行李','先到 BookTeaBed Shibuya 寄放行李。','https://maps.google.com/?q=BookTeaBed+Shibuya',['住宿','行李'],true,'any',35.6618,139.6995],
+['下午','宮下公園 <span class="en">MIYASHITA PARK</span> / 澀谷 PARCO <span class="en">Shibuya PARCO</span>','澀谷周邊逛街，這天不排太滿。','https://maps.google.com/?q=MIYASHITA+PARK+Tokyo',['逛街','雨天可'],true,'11:00-21:00',35.6622,139.7020],
+['咖啡休息','ABOUT LIFE COFFEE BREWERS <span class="en">COFFEE</span>','東京人氣咖啡店，澀谷街景感很強。預算 ¥600–1,500。','https://maps.google.com/?q=ABOUT+LIFE+COFFEE+BREWERS+Shibuya',['咖啡','¥600–1,500'],true,'08:00-18:00',35.6596,139.7005],
+['晚餐','自家製 MENSHO <span class="en">Jikasei MENSHO</span>','推薦鴨白湯拉麵、創作系拉麵。預算 ¥1,000–2,000。','https://maps.google.com/?q=Jikasei+MENSHO+Shibuya',['拉麵','¥1,000–2,000'],true,'11:00-22:00',35.6586,139.7006],
+['有體力再去','下北澤 <span class="en">Shimokitazawa</span>','古著、小酒吧、東京年輕人文化。','https://maps.google.com/?q=Shimokitazawa+Tokyo',['古著','可跳過'],false,'any',35.6615,139.6669],
+['宵夜／小喝','STABLER 下北澤牛肉三明治 <span class="en">Shimokitazawa Meatsand</span>','牛肉三明治，日本 IG 很多人拍。預算 ¥1,500–2,500。','https://maps.google.com/?q=STABLER+Shimokitazawa+Meatsand',['宵夜','¥1,500–2,500'],true,'11:00-22:00',35.6617,139.6676]
+]},
+{day:'第 2 天',date:'6/5（五）',title:'美術館・Harakado・澀谷天空 <span class="en">Shibuya Sky</span>',heading:'美術館<br>澀谷天空',summary:'六本木美術館、青山咖啡、Harakado 與 Shibuya Sky。晚上在澀谷吃高速迴轉壽司。',alert:'Shibuya Sky 已預約 18:20。週五美術館可能開到 20:00，但仍建議保留回澀谷移動與補水時間。',now:'國立新美術館 <span class="en">The National Art Center, Tokyo</span>',nowNote:'12:00 左右到美術館。',next:'豚組食堂 <span class="en">Butagumi Shokudo</span>',nextNote:'東京炸豬排名店，日本人評價很高。',later:'18:20 Shibuya Sky',laterNote:'Shibuya Sky 後吃 Uobei Shibuya。',map:'https://maps.google.com/?q=The+National+Art+Center+Tokyo',items:[
+['12:00 左右','國立新美術館 <span class="en">The National Art Center, Tokyo</span>','營業 10:00–18:00，週五、六到 20:00。','https://maps.google.com/?q=The+National+Art+Center+Tokyo',['美術館','雨天可'],true,'10:00-20:00',35.6653,139.7264],
+['午餐','豚組食堂 <span class="en">Butagumi Shokudo</span>','東京炸豬排名店，日本人評價很高。預算 ¥2,000–3,000。','https://maps.google.com/?q=Butagumi+Shokudo+Tokyo',['午餐','¥2,000–3,000'],true,'11:00-21:00',35.6628,139.7247],
+['下午','東急 PLAZA 原宿 <span class="en">Harakado</span>','Rooftop、food hall、東京新潮流空間。','https://maps.google.com/?q=Harakado+Tokyo',['rooftop','雨天可'],true,'11:00-23:00',35.6689,139.7055],
+['下午咖啡','青山 Kitsuné 咖啡 <span class="en">Cafe Kitsune Aoyama</span>','日本潮流品牌咖啡店，青山散步很適合。預算 ¥700–1,500。','https://maps.google.com/?q=Cafe+Kitsune+Aoyama',['咖啡','¥700–1,500'],true,'10:00-19:00',35.6657,139.7138],
+['傍晚','日枝神社 <span class="en">Hie Shrine</span>','看山王祭氛圍與初夏神社感。','https://maps.google.com/?q=Hie+Shrine+Tokyo',['神社'],false,'06:00-17:00',35.6747,139.7399],
+['18:20','澀谷天空 <span class="en">Shibuya Sky</span>','已預約。可銜接黃昏、藍調時刻與東京夜景。','https://maps.google.com/?q=Shibuya+Sky',['已預約','夜景'],true,'10:00-22:30',35.6584,139.7020],
+['晚餐','魚米澀谷道玄坂店 <span class="en">Uobei Shibuya Dogenzaka Store</span>','日本高速迴轉壽司，日本年輕人很多。預算 ¥1,500–3,000。','https://maps.google.com/?q=Uobei+Shibuya+Dogenzaka+Store',['壽司','¥1,500–3,000'],true,'11:00-23:00',35.6581,139.6979]
+]},
+{day:'第 3 天',date:'6/6（六）',title:'鎌倉・湘南單軌電車日',heading:'鎌倉<br>湘南單軌',summary:'10:00 從澀谷出門，明月院紫陽花、鎌倉午餐，下午搭湘南單軌到江之島。',alert:'紫陽花季人潮多，明月院一定會有人；這天不要再更晚出門。',now:'澀谷 → 北鎌倉',nowNote:'搭 JR 湘南新宿線到北鎌倉站。',next:'明月院 <span class="en">Meigetsuin</span>',nextNote:'看紫陽花與明月院藍。',later:'江之島 <span class="en">Enoshima</span>',laterNote:'海邊散步與湘南氛圍。',map:'https://maps.google.com/?q=Meigetsuin+Kamakura',items:[
+['10:00 出門','澀谷 → 北鎌倉站','澀谷搭 JR 湘南新宿線到北鎌倉。','https://maps.google.com/?q=Kita-Kamakura+Station',['JR 湘南新宿線'],true,'any',35.3377,139.5450],
+['上午','明月院 <span class="en">Meigetsuin</span>','重點：紫陽花、明月院藍。','https://maps.google.com/?q=Meigetsuin+Kamakura',['紫陽花','明月院藍'],false,'09:00-16:00',35.3338,139.5526],
+['午餐','鎌倉 Rokuya 定食 <span class="en">Kamakura Rokuyata</span>','日式定食、湘南 local 感。營業 11:00–16:00，預算 ¥1,000–2,000。','https://maps.google.com/?q=Kamakura+Rokuyata',['定食','¥1,000–2,000'],true,'11:00-16:00',35.3192,139.5503],
+['下午','鎌倉站 → 大船站 → 湘南江之島站','鎌倉站搭 JR 到大船站，再搭湘南單軌電車到湘南江之島站。','https://maps.google.com/?q=Shonan-Enoshima+Station',['湘南單軌'],true,'any',35.3110,139.4877],
+['下午點心','Tobiccho 吻仔魚丼 <span class="en">Shirasu-don</span>','江之島吻仔魚丼，日本人很常排隊。預算 ¥1,500–3,000。','https://maps.google.com/?q=Tobiccho+Enoshima',['吻仔魚丼','¥1,500–3,000'],true,'11:00-21:00',35.3017,139.4804],
+['傍晚','江之島 <span class="en">Enoshima</span>','海邊散步、湘南氛圍。','https://maps.google.com/?q=Enoshima',['海邊','湘南'],false,'any',35.2992,139.4804],
+['晚餐','鎌倉御成橫丁 <span class="en">Onari Yokocho Kamakura</span>','湘南海鮮、生魚片、在地壽司。營業 12:00–15:00、17:00–20:00，預算 ¥2,000–3,000。','https://maps.google.com/?q=Onari+Yokocho+Kamakura',['海鮮','¥2,000–3,000'],true,'17:00-20:00',35.3197,139.5489]
+]},
+{day:'第 4 天',date:'6/7（日）',title:'文京紫陽花祭・月島',heading:'文京<br>紫陽花祭',summary:'文京紫陽花祭、祭典表演與攤販，下午去月島吃文字燒。',alert:'12:00 日本箏曲表演，13:00–14:00 開幕式；這天已刪除高圓寺，避免排太滿。',now:'Bunkyo Ajisai Matsuri',nowNote:'地點 Hakusan Shrine，12:00 左右抵達。',next:'月島文字燒',nextNote:'15:00 左右到 Tsukishima Monja Moheji Flagship。',later:'Torikizoku Shibuya',laterNote:'如果晚上肚子餓再去。',map:'https://maps.google.com/?q=Hakusan+Shrine+Tokyo',items:[
+['12:00 左右','文京紫陽花祭 <span class="en">Bunkyo Ajisai Matsuri</span> / 白山神社 <span class="en">Hakusan Shrine</span>','文京紫陽花祭。推薦看 12:00 日本箏曲表演。','https://maps.google.com/?q=Hakusan+Shrine+Tokyo',['祭典','紫陽花'],false,'09:00-16:00',35.7214,139.7522],
+['13:00–14:00','開幕式','文京紫陽花祭開幕式。','https://maps.google.com/?q=Hakusan+Shrine+Tokyo',['開幕式'],false,'13:00-14:00',35.7214,139.7522],
+['現場小吃','餐車 Kitchen Car / 日本祭典攤販','現場會有 Kitchen Car、日本祭典攤販、小點心。','https://maps.google.com/?q=Hakusan+Shrine+Tokyo',['小吃','攤販'],true,'any',35.7214,139.7522],
+['15:00 左右','月島文字燒 Moheji 本店 <span class="en">Tsukishima Monja Moheji Flagship</span>','推薦明太子文字燒、海鮮文字燒。週日 10:15–23:00，預算 ¥2,000–3,000。','https://maps.google.com/?q=Tsukishima+Monja+Moheji+Flagship',['文字燒','¥2,000–3,000'],true,'10:15-23:00',35.6646,139.7844],
+['晚上可選','鳥貴族澀谷公園通店 <span class="en">YAKITORI Torikizoku Shibuya Koen Dori Store</span>','如果肚子餓，日本平價串燒、日本上班族感。營業 15:00–04:00，預算 ¥2,000 左右。','https://maps.google.com/?q=YAKITORI+Torikizoku+Shibuya+Koen+Dori+Store',['串燒','可選'],true,'15:00-28:00',35.6621,139.6994]
+]},
+{day:'第 5 天',date:'6/8（一）',title:'秋葉原 <span class="en">Akihabara</span>・丸之內 <span class="en">Marunouchi</span>・根室花丸',heading:'秋葉原<br>丸之內',summary:'午餐牛かつ，下午秋葉原，接著抽根室花丸號碼牌與丸之內散步。',alert:'15:30–16:00 先抽根室花丸號碼牌，再利用等待時間散步。',now:'牛かつもと村秋葉原店 <span class="en">Gyukatsu Motomura Akihabara</span>',nowNote:'午餐吃牛炸牛排。',next:'秋葉原 <span class="en">Akihabara</span>',nextNote:'Retro game、模型、電器、轉蛋。',later:'根室花丸',laterNote:'北海道干貝、炙燒鮭魚、鮭魚卵。',map:'https://maps.google.com/?q=Gyukatsu+Motomura+Akihabara',items:[
+['午餐','牛かつもと村秋葉原店 <span class="en">Gyukatsu Motomura Akihabara</span>','牛炸牛排，日本近期超熱門類型。營業 11:00–22:00，預算 ¥2,000–3,000。','https://maps.google.com/?q=Gyukatsu+Motomura+Akihabara',['牛かつ','¥2,000–3,000'],true,'11:00-22:00',35.6986,139.7719],
+['下午','秋葉原 <span class="en">Akihabara</span>','推薦 retro game、模型、電器、轉蛋。','https://maps.google.com/?q=Akihabara+Tokyo',['retro game','轉蛋'],true,'11:00-20:00',35.6984,139.7730],
+['15:30–16:00','迴轉壽司根室花丸 KITTE 丸之內店 <span class="en">Kaitenzushi Nemuro Hanamaru KITTE Marunouchi</span>','先抽號碼牌。營業 11:00–22:00。','https://maps.google.com/?q=Kaitenzushi+Nemuro+Hanamaru+KITTE+Marunouchi',['號碼牌'],true,'11:00-22:00',35.6799,139.7648],
+['下午散步','丸之內 <span class="en">Marunouchi</span>','東京車站夜景、丸之內街景。','https://maps.google.com/?q=Marunouchi+Tokyo',['東京車站','街景'],true,'any',35.6812,139.7671],
+['晚餐','根室花丸','推薦北海道干貝、炙燒鮭魚、鮭魚卵。預算 ¥2,000–4,000。','https://maps.google.com/?q=Kaitenzushi+Nemuro+Hanamaru+KITTE+Marunouchi',['壽司','¥2,000–4,000'],true,'11:00-22:00',35.6799,139.7648]
+]},
+{day:'第 6 天',date:'6/9（二）',title:'吉祥寺・回程',heading:'吉祥寺<br>回程日',summary:'中午吉祥寺，午餐漢堡排，下午井之頭公園與咖啡，傍晚前往成田。',alert:'16:00 左右回澀谷拿行李，17:30 前往成田機場。推薦 Narita Express（N’EX）。',now:'吉祥寺 <span class="en">Kichijoji</span>',nowNote:'中午到吉祥寺。',next:'挽肉と米 吉祥寺 <span class="en">Hikiniku to Come Kichijoji</span>',nextNote:'東京超人氣漢堡排。',later:'17:30 前往成田機場',laterNote:'回程 Scoot TR867，21:15 成田 T1 起飛。',map:'https://maps.google.com/?q=Kichijoji+Tokyo',items:[
+['中午','吉祥寺 <span class="en">Kichijoji</span>','中午抵達吉祥寺。','https://maps.google.com/?q=Kichijoji+Tokyo',['吉祥寺'],true,'any',35.7031,139.5797],
+['午餐','挽肉と米 吉祥寺 <span class="en">Hikiniku to Come Kichijoji</span>','東京超人氣漢堡排，日本人排隊名店。營業 11:00–15:00、17:00–21:00，預算 ¥1,000–2,000。','https://maps.google.com/?q=Hikiniku+to+Come+Kichijoji',['漢堡排','¥1,000–2,000'],true,'11:00-15:00',35.7031,139.5797],
+['下午','井之頭恩賜公園 <span class="en">Inokashira Park</span>','散步、咖啡、初夏綠意。','https://maps.google.com/?q=Inokashira+Park',['公園','散步'],false,'any',35.7002,139.5738],
+['下午咖啡','SIDEWALK STAND 井之頭 <span class="en">INOKASHIRA</span>','吉祥寺人氣咖啡店，公園散步很適合。預算 ¥600–1,500。','https://maps.google.com/?q=SIDEWALK+STAND+INOKASHIRA',['咖啡','¥600–1,500'],true,'09:00-19:00',35.6995,139.5756],
+['16:00 左右','回澀谷拿行李','回飯店拿行李。','https://maps.google.com/?q=BookTeaBed+Shibuya',['行李'],true,'any',35.6618,139.6995],
+['17:30','前往成田機場','推薦 Narita Express（N’EX）。','https://maps.google.com/?q=Narita+Airport+Terminal+1',['N’EX','NRT T1'],true,'any',35.7720,140.3929]
+]}
+];let activeIndex=0,rainMode=false;function statusFor(hours){if(hours==='any')return ['可彈性安排','status-open'];const now=new Date();const h=now.getHours()+now.getMinutes()/60;const [s,e]=hours.split('-').map(t=>{const [hh,mm]=t.split(':').map(Number);return hh+mm/60});if(e>24){if(h>=s||h<=e-24)return [`營業中至 ${String(e-24).padStart(2,'0')}:00`,'status-open'];return [`${hours.split('-')[0]} 開始`,'status-warn']}if(h<s)return [`${hours.split('-')[0]} 開始`,'status-warn'];if(h>e)return ['可能已休息','status-closed'];if(e-h<=1.5)return [`即將結束 ${hours.split('-')[1]}`,'status-warn'];return [`營業中至 ${hours.split('-')[1]}`,'status-open']}function render(){
   const nav=document.getElementById('dayNav');
   const track=document.getElementById('daysTrack');
   const dock=document.getElementById('mobileDayDock');
   nav.innerHTML=tripData.map((d,i)=>`<button class="day-tab ${i===0?'active':''}" data-day="${i}">${d.day}</button>`).join('');
   dock.innerHTML=tripData.map((d,i)=>`<button class="mobile-day-btn ${i===0?'active':''}" data-day="${i}">D${i+1}</button>`).join('');
-  track.innerHTML=tripData.map((d)=>`<article class="day-panel"><div class="day-summary"><div class="day-no">${d.day}｜${d.date}</div><h3>${d.heading}</h3><p>${d.summary}</p><div class="alert-card"><strong>重要提醒</strong><span>${d.alert}</span></div></div><div class="cards">${d.items.map(item=>`<div class="day-card"><div class="card-row"><h3>${item[1]}</h3><span class="time">${item[0]}</span></div><p>${item[2]}</p><div class="tags">${item[4].map(t=>`<span class="tag ${t.includes('可跳過')||t.includes('已預約')?'warning':''}">${t}</span>`).join('')}</div><a class="map-link" aria-label="Google Maps 導航" title="Google Maps 導航" href="${item[3]}" target="_blank" rel="noopener">${mapIcon}</a></div>`).join('')}</div></article>`).join('');
+  track.innerHTML=tripData.map((d,di)=>`<article class="day-panel"><div class="day-summary"><div class="day-no">${d.day}｜${d.date}</div><h3>${d.heading}</h3><p>${d.summary}</p><div class="alert-card"><strong>重要提醒</strong><span>${d.alert}</span></div></div><div class="cards">${d.items.map((item,ii)=>{const st=statusFor(item[6]);const id=`d${di}-i${ii}`;return `<div class="day-card ${localStorage.getItem(id)==='done'?'done':''}" data-rain="${item[5]}"><div class="card-row"><h3>${item[1]}</h3><span class="time">${item[0]}</span></div><p>${item[2]}</p><div class="tags"><span class="tag ${st[1]}">${st[0]}</span>${item[4].map(t=>`<span class="tag ${t.includes('可跳過')||t.includes('已預約')?'warning':''}">${t}</span>`).join('')}</div><div class="card-actions"><button class="icon-btn done-btn" aria-label="標記完成" data-id="${id}">${checkIcon}</button><a class="map-link" aria-label="Google Maps 導航" title="Google Maps 導航" href="${item[3]}" target="_blank" rel="noopener">${mapIcon}</a></div></div>`}).join('')}</div></article>`).join('');
 }
 render();
+
 const revealItems=document.querySelectorAll('.reveal');
-const observer=new IntersectionObserver(entries=>{entries.forEach(entry=>{if(entry.isIntersecting)entry.target.classList.add('visible')})},{threshold:.18});
+const observer=new IntersectionObserver(entries=>{
+  entries.forEach(entry=>{if(entry.isIntersecting)entry.target.classList.add('visible')});
+},{threshold:.18});
 revealItems.forEach(item=>observer.observe(item));
+
 const track=document.getElementById('daysTrack');
 let tabs=[...document.querySelectorAll('.day-tab')];
 let dockTabs=[...document.querySelectorAll('.mobile-day-btn')];
 let panels=[...document.querySelectorAll('.day-panel')];
-let activeIndex=0;
-function updateDashboard(index){const d=tripData[index];activeIndex=index;document.getElementById('dashTitle').textContent=d.title;document.getElementById('dashDate').innerHTML=`${d.day}<br>${d.date}`;document.getElementById('dashNow').textContent=d.now;document.getElementById('dashNowNote').textContent=d.nowNote;document.getElementById('dashNext').textContent=d.next;document.getElementById('dashNextNote').textContent=d.nextNote;document.getElementById('dashLater').textContent=d.later;document.getElementById('dashLaterNote').textContent=d.laterNote;document.getElementById('dashMap').href=d.map;document.getElementById('dashProgress').style.width=((index+1)/tripData.length*100)+'%';tabs.forEach((tab,i)=>tab.classList.toggle('active',i===index));dockTabs.forEach((tab,i)=>tab.classList.toggle('active',i===index))}
-function scrollToDay(index){const safe=Math.max(0,Math.min(index,panels.length-1));panels[safe].scrollIntoView({behavior:'smooth',inline:'center',block:'nearest'});updateDashboard(safe)}
-function getInitialDay(){const today=new Date();const start=new Date('2026-06-04T00:00:00');const diff=Math.floor((today-start)/(1000*60*60*24));if(diff<0)return 0;if(diff>5)return 5;return diff}
+
+function updateDashboard(index){
+  const d=tripData[index];
+  activeIndex=index;
+  document.getElementById('dashTitle').innerHTML=d.title;
+  document.getElementById('dashDate').innerHTML=`${d.day}<br>${d.date}`;
+  document.getElementById('dashNow').innerHTML=d.now;
+  document.getElementById('dashNowNote').textContent=d.nowNote;
+  document.getElementById('dashNext').innerHTML=d.next;
+  document.getElementById('dashNextNote').textContent=d.nextNote;
+  document.getElementById('dashLater').innerHTML=d.later;
+  document.getElementById('dashLaterNote').textContent=d.laterNote;
+  document.getElementById('dashMap').href=d.map;
+  document.getElementById('dashProgress').style.width=((index+1)/tripData.length*100)+'%';
+  tabs.forEach((tab,i)=>tab.classList.toggle('active',i===index));
+  dockTabs.forEach((tab,i)=>tab.classList.toggle('active',i===index));
+  document.getElementById('nearbyList').classList.remove('show');
+}
+function scrollToDay(index){
+  const safe=Math.max(0,Math.min(index,panels.length-1));
+  panels[safe].scrollIntoView({behavior:'smooth',inline:'center',block:'nearest'});
+  updateDashboard(safe);
+}
+function getInitialDay(){
+  const today=new Date();
+  const start=new Date('2026-06-04T00:00:00');
+  const diff=Math.floor((today-start)/(1000*60*60*24));
+  if(diff<0)return 0;
+  if(diff>5)return 5;
+  return diff;
+}
+
 tabs.forEach((tab,index)=>tab.addEventListener('click',()=>scrollToDay(index)));
 dockTabs.forEach((tab,index)=>tab.addEventListener('click',()=>scrollToDay(index)));
 document.getElementById('prevDay').addEventListener('click',()=>scrollToDay(activeIndex-1));
 document.getElementById('nextDay').addEventListener('click',()=>scrollToDay(activeIndex+1));
-const panelObserver=new IntersectionObserver(entries=>{entries.forEach(entry=>{if(entry.isIntersecting){const index=panels.indexOf(entry.target);if(index>=0)updateDashboard(index)}})},{root:track,threshold:.55});
+
+const panelObserver=new IntersectionObserver(entries=>{
+  entries.forEach(entry=>{if(entry.isIntersecting){const index=panels.indexOf(entry.target);if(index>=0)updateDashboard(index)}});
+},{root:track,threshold:.55});
 panels.forEach(panel=>panelObserver.observe(panel));
-window.addEventListener('load',()=>{const initial=getInitialDay();updateDashboard(initial);if(window.innerWidth>900){setTimeout(()=>scrollToDay(initial),200)}});
+
+document.addEventListener('click',e=>{
+  const btn=e.target.closest('.done-btn');
+  if(!btn)return;
+  const card=btn.closest('.day-card');
+  const id=btn.dataset.id;
+  if(card.classList.toggle('done')) localStorage.setItem(id,'done');
+  else localStorage.removeItem(id);
+});
+
+document.getElementById('rainBtn').addEventListener('click',()=>{
+  rainMode=!rainMode;
+  document.getElementById('rainBtn').classList.toggle('active',rainMode);
+  document.querySelectorAll('.day-card').forEach(c=>{
+    c.classList.toggle('hidden-by-rain',rainMode && c.dataset.rain==='false');
+  });
+});
+function dist(a,b,c,d){
+  const R=6371,rad=x=>x*Math.PI/180;
+  const x=rad(c-a),y=rad(d-b);
+  const aa=Math.sin(x/2)**2+Math.cos(rad(a))*Math.cos(rad(c))*Math.sin(y/2)**2;
+  return R*2*Math.atan2(Math.sqrt(aa),Math.sqrt(1-aa));
+}
+document.getElementById('nearbyBtn').addEventListener('click',()=>{
+  const list=document.getElementById('nearbyList');
+  if(list.classList.contains('show')){list.classList.remove('show');return}
+  list.innerHTML='<div class="nearby-item">定位中…<span>請允許位置</span></div>';
+  list.classList.add('show');
+  if(!navigator.geolocation){list.innerHTML='<div class="nearby-item">此瀏覽器不支援定位<span>可用導航替代</span></div>';return}
+  navigator.geolocation.getCurrentPosition(pos=>{
+    const {latitude,longitude}=pos.coords;
+    const items=tripData[activeIndex].items.map(i=>({...{time:i[0],name:i[1],map:i[3]},km:dist(latitude,longitude,i[7],i[8])})).sort((a,b)=>a.km-b.km);
+    list.innerHTML=items.slice(0,5).map(i=>`<a class="nearby-item" href="${i.map}" target="_blank" rel="noopener">${i.name}<span>${i.km.toFixed(1)} km</span></a>`).join('');
+  },()=>{list.innerHTML='<div class="nearby-item">無法取得位置<span>請改用地圖導航</span></div>'});
+});
+window.addEventListener('load',()=>{
+  const initial=getInitialDay();
+  updateDashboard(initial);
+  if(window.innerWidth>900){setTimeout(()=>scrollToDay(initial),200)}
+});
 </script>
 </body>
 </html>
